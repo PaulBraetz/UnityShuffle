@@ -1,0 +1,146 @@
+﻿@page "/"
+@using System.Text
+@using System.Collections.Concurrent
+@implements IDisposable
+
+<div class="d-flex flex-column">
+    <div>
+        Active Rooms: @rooms.Count()
+    </div>
+    <div>
+Your Room: @created.PublicKey
+    </div>
+    <div>
+Your Card: @created.Current.Title
+    </div>
+    <div>
+<button class="btn btn-outline-primary" @onclick="created.SetRandomCard">
+    Draw New Card
+</button>
+    </div>
+</div>
+<div class="d-flex flex-column">
+    <div>
+<input type="text" @bind-value="@NewKey"/>
+    </div>
+    <div>
+<button class="btn btn-outline-primary" @onclick="Join">
+    Join
+</button>
+    </div>
+    </div>
+
+
+@if(joined != null)
+{
+<div>
+<dl>
+    <dt>
+        Joined
+    </dt>
+    <dd>
+        @joined.PublicKey
+    </dd>
+    <dt>
+        Card
+    </dt>
+    <dd>
+        @joined.Current.Title
+    </dd>
+</dl>
+</div>
+}
+
+
+@code{
+    sealed class Room:IDisposable
+    {
+        public readonly struct Card
+        {
+            public readonly String Title;
+
+            public Card(String title)
+            {
+                Title = title;
+            }
+        }
+
+        public Room()
+        {
+            var key = String.Empty;
+            var bytes = new Byte[4];
+            do
+            {
+                Random.Shared.NextBytes(bytes);
+                key = BitConverter.ToString(bytes).Replace("-","");
+            } while (!rooms.TryAdd(key, this));
+            PublicKey = key;
+            Cards = cards;
+            SetRandomCard();
+        }
+
+        private static readonly Card[] cards = new Card[]
+        {
+            new("Card 1"),
+            new("Card 2"),
+            new("Card 3")
+        };
+
+        public readonly String PublicKey;
+        private readonly Card[] Cards;
+        public Card Current{ get; private set; }
+        public event EventHandler<Card>? NewCardSet;
+        public event EventHandler? RoomDisposed;
+
+        public void SetRandomCard()
+        {
+            Current = Cards.Except(new Card[] { Current }).ElementAt(Random.Shared.Next(0,Cards.Length-1));
+            NewCardSet?.Invoke(this, Current);
+        }
+        public IEnumerable<Card> GetCards()
+        {
+            foreach(var card in Cards)
+            {
+                yield return card;
+            }
+        }
+
+        public void Dispose()
+        {
+            RoomDisposed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private static ConcurrentDictionary<String, Room> rooms = new();
+
+    private Room created = new();
+
+    private Room? joined;
+    private String NewKey = String.Empty;
+
+    private void Join()
+    {
+        if(rooms.TryGetValue(NewKey, out joined))
+        {
+            joined.NewCardSet += (sender, card) =>
+                  {
+                      InvokeAsync(StateHasChanged);
+                  };
+            joined.RoomDisposed += (sender, args) =>
+            {
+                joined = null;
+                InvokeAsync(StateHasChanged);
+            };
+            NewKey = String.Empty;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        if(rooms.Remove(created.PublicKey, out var removed))
+        {
+            removed.Dispose();
+        }
+    }
+}
