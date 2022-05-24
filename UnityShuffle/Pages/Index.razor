@@ -6,7 +6,6 @@
 <div class="d-flex flex-column">
 	<div class="d-flex justify-content-center">
 		<div class="rounded shadow d-flex flex-column m-2 p-2">
-
 			<dl class="mb-0">
 				<dt>
 					Active Rooms
@@ -20,32 +19,8 @@
 				<dd>
 					@ownRoom.PublicKey
 				</dd>
-				@if (ownRoom.Current != Room.Card.Empty)
-				{
-					<dt>
-						Your Rooms Current Card
-					</dt>
-					<dd>
-						@ownRoom.Current.Title
-					</dd>
-				}
 			</dl>
-			@if (ownRoom.Cards.Any())
-			{
-				<div>
-					<button class="btn btn-outline-primary" @onclick="ownRoom.SetRandomCard">
-						Draw New Card
-					</button>
-				</div>
-			}
-			<span class="border-bottom m-3 border-dark">
-
-			</span>
-			<div>
-				<h6>
-					Add New Card
-				</h6>
-			</div>
+			<span class="border-bottom my-3 border-dark"></span>
 			<label for="newCardTitleInput">
 				Title (Required)
 			</label>
@@ -58,38 +33,134 @@
 			<div>
 				<input id="newCardTaskInput" type="text" @bind-value="@newCardTask" />
 			</div>
-			@if (!String.IsNullOrWhiteSpace(newCardTitle))
-			{
-				<div>
-					<button class="mt-1 btn btn-outline-primary" @onclick="()=>{
-					ownRoom.Cards.Add(new Room.Card(newCardTitle, newCardTask));
-					newCardTitle = string.Empty;
-					newCardTask = string.Empty;
-					}">
-						Add New Card
-					</button>
-				</div>
-			}
-			@if (ownRoom.Cards.Any())
-			{
-				<ul>
-					@foreach (var card in ownRoom.Cards)
+			<div class="mt-1">
+				<div class="btn-group">
+					@if (!String.IsNullOrWhiteSpace(newCardTitle))
 					{
-						<li>
-							<div class="d-flex flex-column">
-								<div>
-									@card.Title (<span class="text-danger" style="cursor:pointer" @onclick="()=>ownRoom.Cards.Remove(card)">delete</span>)
-								</div>
-								@if (!String.IsNullOrWhiteSpace(card.Task))
-								{
-									<div class="pl-5">
-										&rarr; @card.Task
-									</div>
-								}
-							</div>
-						</li>
+						<button class="btn btn-outline-primary" @onclick="()=>{
+							ownRoom.Game.Add(new Room.Card(newCardTitle, newCardTask));
+							newCardTitle = string.Empty;
+							newCardTask = string.Empty;
+						}">
+							Add
+						</button>
 					}
-				</ul>
+					else
+					{
+						<button class="btn btn-outline-primary" disabled>
+							Add
+						</button>
+					}
+					@if (ownRoom.Game.Cards.Any())
+					{
+						<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Shuffle">
+							Shuffle
+						</button>
+					}
+					else
+					{
+						<button class="btn btn-outline-primary" disabled>
+							Shuffle
+						</button>
+					}
+					@if (ownRoom.Game.Next != Room.Card.Empty)
+					{
+						<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Skip">
+							Skip
+						</button>
+					}
+					else
+					{
+						<button class="btn btn-outline-primary" disabled>
+							Skip
+						</button>
+					}
+
+					@if (ownRoom.Game.Next != Room.Card.Empty)
+					{
+						<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Draw">
+							Draw
+						</button>
+					}
+					else
+					{
+						<button class="btn btn-outline-primary" disabled>
+							Draw
+						</button>
+					}
+					@if (ownRoom.Game.Top != Room.Card.Empty)
+					{
+						<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Join">
+							Join
+						</button>
+					}
+					else
+					{
+						<button class="btn btn-outline-primary" disabled>
+							Join
+						</button>
+					}
+				</div>
+			</div>
+			@if (ownRoom.Game.Cards.Any())
+			{
+				<dl>
+					<dt>
+						Drawn
+					</dt>
+					<dd class="text-primary">
+						@ownRoom.Game.Top.Title
+					</dd>
+					<dt>
+						Next
+					</dt>
+					<dd class="text-info">
+						@ownRoom.Game.Next.Title
+					</dd>
+					<dt>
+						Cards
+					</dt>
+					<dd>
+						<ul>
+							@foreach (var card in ownRoom.Game.Cards.Reverse())
+							{
+								<li>
+									<div class="d-flex flex-column">
+										<div>
+											@if (card == ownRoom.Game.Top)
+											{
+												<span class="text-primary">
+													@card.Title&nbsp;
+												</span>
+											}
+											else if (card == ownRoom.Game.Next)
+											{
+												<span class="text-info">
+													@card.Title&nbsp;
+												</span>
+											}
+											else
+											{
+												<span>
+													@card.Title&nbsp;
+												</span>
+											}
+											<span class="text-danger" style="cursor:pointer" @onclick="()=>ownRoom.Game.Remove(card)">
+												(remove)
+											</span>
+										</div>
+										@if (!String.IsNullOrWhiteSpace(card.Task))
+										{
+											<div class="pl-5">
+												&rarr; @card.Task
+											</div>
+										}
+									</div>
+								</li>
+							}
+						</ul>
+					</dd>
+				</dl>
 			}
 		</div>
 	</div>
@@ -109,6 +180,14 @@
 					</button>
 				</div>
 			}
+			else
+			{
+				<div>
+					<button class="mt-1 btn btn-outline-primary" disabled>
+						Join
+					</button>
+				</div>
+			}
 			@if (joined != null)
 			{
 				<dl class="mt-1 mb-0">
@@ -118,21 +197,24 @@
 					<dd>
 						@joined.PublicKey
 					</dd>
-					@if (joined.Current != Room.Card.Empty)
+					@if (joined.Game.Top != Room.Card.Empty)
 					{
 						<dt>
-							Current Card @if(showNotification){<span class="text-success" style="cursor:pointer" @onclick="()=>showNotification=false">NEW</span>}
+							Current Card @if (showNotification)
+							{
+								<span class="text-success" style="cursor:pointer" @onclick="()=>showNotification=false">NEW</span>
+							}
 						</dt>
 						<dd>
-							@joined.Current.Title
+							@joined.Game.Top.Title
 						</dd>
-						@if (!string.IsNullOrWhiteSpace(joined.Current.Task))
+						@if (!string.IsNullOrWhiteSpace(joined.Game.Top.Task))
 						{
 							<dt>
 								Current Task
 							</dt>
 							<dd>
-								@joined.Current.Task
+								@joined.Game.Top.Task
 							</dd>
 						}
 					}
@@ -185,6 +267,110 @@
 			}
 		}
 
+		public sealed class CardGame
+		{
+			private Stack<Card> Deck = new Stack<Card>();
+			private Stack<Card> Drawn = new Stack<Card>();
+			public Card Top => Drawn.TryPeek(out var top) ? top : Card.Empty;
+			public Card Next => Deck.TryPeek(out var next) ? next : Card.Empty;
+
+			public IEnumerable<Card> Cards
+			{
+				get
+				{
+					foreach (var card in Drawn)
+					{
+						yield return card;
+					}
+					foreach (var card in Deck)
+					{
+						yield return card;
+					}
+				}
+			}
+
+			public void Add(Card card)
+			{
+				Deck.Push(card);
+			}
+
+			public void Remove(Card card)
+			{
+				removeFrom(ref Deck);
+				removeFrom(ref Drawn);
+
+				void removeFrom(ref Stack<Card> stack)
+				{
+					var newStack = new Stack<Card>();
+
+					while (stack.TryPop(out var c))
+					{
+						if (c != card)
+						{
+							newStack.Push(c);
+						}
+					}
+
+					stack = newStack;
+				}
+			}
+
+			public void Shuffle()
+			{
+				var cards = new List<Card>();
+
+				while (Deck.TryPop(out var c))
+				{
+					cards.Add(c);
+				}
+
+				while (cards.Any())
+				{
+					var index = Random.Shared.Next(0, cards.Count());
+					var card = cards.ElementAt(index);
+					Deck.Push(card);
+					cards.RemoveAt(index);
+				}
+			}
+
+			public void Join()
+			{
+				while (Drawn.TryPop(out var c))
+				{
+					Deck.Push(c);
+				}
+			}
+
+			public void Draw()
+			{
+				if (Deck.TryPop(out var c))
+				{
+					Drawn.Push(c);
+					CardDrawn?.Invoke(this, Drawn.Peek());
+				}
+			}
+
+			public void Skip()
+			{
+				if (Next != Card.Empty)
+				{
+					var next = Deck.Pop(); ;
+					var hold = new Stack<Card>();
+					while (Deck.TryPop(out var c))
+					{
+						hold.Push(c);
+					}
+					hold.Push(next);
+					while (hold.TryPop(out var c))
+					{
+						Deck.Push(c);
+					}
+				}
+			}
+
+			public event EventHandler<Card>? CardDrawn;
+		}
+
 		public Room()
 		{
 			var key = String.Empty;
@@ -195,34 +381,14 @@
 				key = BitConverter.ToString(bytes).Replace("-", "");
 			} while (!rooms.TryAdd(key, this));
 			PublicKey = key;
-			Cards = new List<Card>();
-			SetRandomCard();
+			Game = new CardGame();
 			NewRoomCreated?.Invoke(this, EventArgs.Empty);
 		}
 
 		public readonly String PublicKey;
-		public readonly List<Card> Cards;
-		public Card Current { get; private set; }
-		public event EventHandler<Card>? NewCardSet;
+		public readonly CardGame Game;
 		public event EventHandler? RoomDisposed;
 
-		public void SetRandomCard()
-		{
-			if (Cards.Any())
-			{
-				if (Cards.Count() == 1)
-				{
-					Current = Cards.Single();
-				}
-				else
-				{
-					var nonCurrent = Cards.Where(c => c != Current);
-					var index = Random.Shared.Next(0, nonCurrent.Count() - 1);
-					Current = nonCurrent.ElementAt(index);
-				}
-				NewCardSet?.Invoke(this, Current);
-			}
-		}
 
 		public void Dispose()
 		{
@@ -261,11 +427,11 @@
 	{
 		if (rooms.TryGetValue(joinKey, out joined))
 		{
-			joined.NewCardSet += async (sender, card) =>
+			joined.Game.CardDrawn += async (sender, card) =>
 						{
 							showNotification = true;
 							await InvokeAsync(StateHasChanged);
-							await Task.Delay(30000);
+							await Task.Delay(10000);
 							showNotification = false;
 							await InvokeAsync(StateHasChanged);
 						};
