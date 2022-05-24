@@ -122,7 +122,7 @@
 					</dt>
 					<dd>
 						<ul>
-							@foreach (var card in ownRoom.Game.Cards.Reverse())
+							@foreach (var card in ownRoom.Game.Cards)
 							{
 								<li>
 									<div class="d-flex flex-column">
@@ -278,11 +278,11 @@
 			{
 				get
 				{
-					foreach (var card in Drawn)
+					foreach (var card in Drawn.Reverse())
 					{
 						yield return card;
 					}
-					foreach (var card in Deck)
+					foreach (var card in Deck.Reverse())
 					{
 						yield return card;
 					}
@@ -296,6 +296,8 @@
 
 			public void Remove(Card card)
 			{
+				var top = Top;
+
 				removeFrom(ref Deck);
 				removeFrom(ref Drawn);
 
@@ -312,6 +314,11 @@
 					}
 
 					stack = newStack;
+				}
+
+				if(top != Top)
+				{
+					CardDrawn?.Invoke(this, Top);
 				}
 			}
 
@@ -339,6 +346,7 @@
 				{
 					Deck.Push(c);
 				}
+				CardDrawn?.Invoke(this, Top);
 			}
 
 			public void Draw()
