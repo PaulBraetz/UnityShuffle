@@ -4,145 +4,281 @@
 @implements IDisposable
 
 <div class="d-flex flex-column">
-    <div>
-        Active Rooms: @rooms.Count()
-    </div>
-    <div>
-Your Room: @created.PublicKey
-    </div>
-    <div>
-Your Card: @created.Current.Title
-    </div>
-    <div>
-<button class="btn btn-outline-primary" @onclick="created.SetRandomCard">
-    Draw New Card
-</button>
-    </div>
+	<div class="d-flex justify-content-center">
+		<div class="rounded shadow d-flex flex-column m-2 p-2">
+
+			<dl class="mb-0">
+				<dt>
+					Active Rooms
+				</dt>
+				<dd>
+					@rooms.Count()
+				</dd>
+				<dt>
+					Your Room
+				</dt>
+				<dd>
+					@ownRoom.PublicKey
+				</dd>
+				@if (ownRoom.Current != Room.Card.Empty)
+				{
+					<dt>
+						Your Rooms Current Card
+					</dt>
+					<dd>
+						@ownRoom.Current.Title
+					</dd>
+				}
+			</dl>
+			@if (ownRoom.Cards.Any())
+			{
+				<div>
+					<button class="btn btn-outline-primary" @onclick="ownRoom.SetRandomCard">
+						Draw New Card
+					</button>
+				</div>
+			}
+			<span class="border-bottom m-3 border-dark">
+
+			</span>
+			<div>
+				<h6>
+					Add New Card
+				</h6>
+			</div>
+			<label for="newCardTitleInput">
+				Title (Required)
+			</label>
+			<div>
+				<input id="newCardTitleInput" type="text" @bind-value="@newCardTitle" />
+			</div>
+			<label for="newCardTaskInput">
+				Task
+			</label>
+			<div>
+				<input id="newCardTaskInput" type="text" @bind-value="@newCardTask" />
+			</div>
+			@if (!String.IsNullOrWhiteSpace(newCardTitle))
+			{
+				<div>
+					<button class="mt-1 btn btn-outline-primary" @onclick="()=>{
+					ownRoom.Cards.Add(new Room.Card(newCardTitle, newCardTask));
+					newCardTitle = string.Empty;
+					newCardTask = string.Empty;
+					}">
+						Add New Card
+					</button>
+				</div>
+			}
+			@if (ownRoom.Cards.Any())
+			{
+				<ul>
+					@foreach (var card in ownRoom.Cards)
+					{
+						<li>
+							<div class="d-flex flex-column">
+								<div>
+									@card.Title (<span class="text-danger" style="cursor:pointer" @onclick="()=>ownRoom.Cards.Remove(card)">delete</span>)
+								</div>
+								@if (!String.IsNullOrWhiteSpace(card.Task))
+								{
+									<div class="pl-5">
+										&rarr; @card.Task
+									</div>
+								}
+							</div>
+						</li>
+					}
+				</ul>
+			}
+		</div>
+	</div>
+	<div class="d-flex justify-content-center">
+		<div class="rounded shadow d-flex flex-column m-2 p-2">
+			<label for="joinKeyInput">
+				Join Room
+			</label>
+			<div>
+				<input id="joinKeyInput" type="text" @bind-value="@joinKey" />
+			</div>
+			@if (!String.IsNullOrWhiteSpace(joinKey))
+			{
+				<div>
+					<button class="mt-1 btn btn-outline-primary" @onclick="Join">
+						Join
+					</button>
+				</div>
+			}
+			@if (joined != null)
+			{
+				<dl class="mt-1 mb-0">
+					<dt>
+						Joined
+					</dt>
+					<dd>
+						@joined.PublicKey
+					</dd>
+					@if (joined.Current != Room.Card.Empty)
+					{
+						<dt>
+							Current Card
+						</dt>
+						<dd>
+							@joined.Current.Title
+						</dd>
+						@if (!string.IsNullOrWhiteSpace(joined.Current.Task))
+						{
+							<dt>
+								Current Task
+							</dt>
+							<dd>
+								@joined.Current.Task
+							</dd>
+						}
+					}
+				</dl>
+			}
+		</div>
+	</div>
 </div>
-<div class="d-flex flex-column">
-    <div>
-<input type="text" @bind-value="@NewKey"/>
-    </div>
-    <div>
-<button class="btn btn-outline-primary" @onclick="Join">
-    Join
-</button>
-    </div>
-    </div>
 
 
-@if(joined != null)
-{
-<div>
-<dl>
-    <dt>
-        Joined
-    </dt>
-    <dd>
-        @joined.PublicKey
-    </dd>
-    <dt>
-        Card
-    </dt>
-    <dd>
-        @joined.Current.Title
-    </dd>
-</dl>
-</div>
-}
 
+@code {
+	sealed class Room : IDisposable
+	{
+		public readonly struct Card : IEquatable<Card>
+		{
+			public Card(String title, String task)
+			{
+				Title = title;
+				Task = task;
+			}
+			public static readonly Card Empty = new();
 
-@code{
-    sealed class Room:IDisposable
-    {
-        public readonly struct Card
-        {
-            public readonly String Title;
+			public readonly String Title;
+			public readonly String Task;
 
-            public Card(String title)
-            {
-                Title = title;
-            }
-        }
+			public override Boolean Equals(Object? obj)
+			{
+				return obj is Card card && Equals(card);
+			}
 
-        public Room()
-        {
-            var key = String.Empty;
-            var bytes = new Byte[4];
-            do
-            {
-                Random.Shared.NextBytes(bytes);
-                key = BitConverter.ToString(bytes).Replace("-","");
-            } while (!rooms.TryAdd(key, this));
-            PublicKey = key;
-            Cards = cards;
-            SetRandomCard();
-        }
+			public Boolean Equals(Card other)
+			{
+				return Title == other.Title && Task == other.Task;
+			}
 
-        private static readonly Card[] cards = new Card[]
-        {
-            new("Card 1"),
-            new("Card 2"),
-            new("Card 3"),
-            new("Card 4"),
-            new("Card 5")
-        };
+			public override Int32 GetHashCode()
+			{
+				return HashCode.Combine(Title);
+			}
 
-        public readonly String PublicKey;
-        private readonly Card[] Cards;
-        public Card Current{ get; private set; }
-        public event EventHandler<Card>? NewCardSet;
-        public event EventHandler? RoomDisposed;
+			public static Boolean operator ==(Card left, Card right)
+			{
+				return left.Equals(right);
+			}
 
-        public void SetRandomCard()
-        {
-            Current = Cards.Except(new Card[] { Current }).ElementAt(Random.Shared.Next(0,Cards.Length-1));
-            NewCardSet?.Invoke(this, Current);
-        }
-        public IEnumerable<Card> GetCards()
-        {
-            foreach(var card in Cards)
-            {
-                yield return card;
-            }
-        }
+			public static Boolean operator !=(Card left, Card right)
+			{
+				return !(left == right);
+			}
+		}
 
-        public void Dispose()
-        {
-            RoomDisposed?.Invoke(this, EventArgs.Empty);
-        }
-    }
+		public Room()
+		{
+			var key = String.Empty;
+			var bytes = new Byte[4];
+			do
+			{
+				Random.Shared.NextBytes(bytes);
+				key = BitConverter.ToString(bytes).Replace("-", "");
+			} while (!rooms.TryAdd(key, this));
+			PublicKey = key;
+			Cards = new List<Card>();
+			SetRandomCard();
+			NewRoomCreated?.Invoke(this, EventArgs.Empty);
+		}
 
-    private static ConcurrentDictionary<String, Room> rooms = new();
+		public readonly String PublicKey;
+		public readonly List<Card> Cards;
+		public Card Current { get; private set; }
+		public event EventHandler<Card>? NewCardSet;
+		public event EventHandler? RoomDisposed;
 
-    private Room created = new();
+		public void SetRandomCard()
+		{
+			if (Cards.Any())
+			{
+				if (Cards.Count() == 1)
+				{
+					Current = Cards.Single();
+				}
+				else
+				{
+					var nonCurrent = Cards.Where(c => c != Current);
+					var index = Random.Shared.Next(0, nonCurrent.Count() - 1);
+					Current = nonCurrent.ElementAt(index);
+				}
+				NewCardSet?.Invoke(this, Current);
+			}
+		}
 
-    private Room? joined;
-    private String NewKey = String.Empty;
+		public void Dispose()
+		{
+			this.RoomDisposed?.Invoke(this, EventArgs.Empty);
+			Index.RoomDisposed?.Invoke(this, EventArgs.Empty);
+		}
+	}
 
-    private void Join()
-    {
-        if(rooms.TryGetValue(NewKey, out joined))
-        {
-            joined.NewCardSet += (sender, card) =>
-                  {
-                      InvokeAsync(StateHasChanged);
-                  };
-            joined.RoomDisposed += (sender, args) =>
-            {
-                joined = null;
-                InvokeAsync(StateHasChanged);
-            };
-            NewKey = String.Empty;
-            InvokeAsync(StateHasChanged);
-        }
-    }
+	private static ConcurrentDictionary<String, Room> rooms = new();
 
-    public void Dispose()
-    {
-        if(rooms.Remove(created.PublicKey, out var removed))
-        {
-            removed.Dispose();
-        }
-    }
+	private Room ownRoom = new();
+
+	private Room? joined;
+	private String joinKey = String.Empty;
+
+	private static event EventHandler? NewRoomCreated;
+	private static event EventHandler? RoomDisposed;
+
+	private String newCardTitle = String.Empty;
+	private String newCardTask = String.Empty;
+
+	protected override void OnInitialized()
+	{
+		NewRoomCreated += (sender, args) =>
+					{
+						InvokeAsync(StateHasChanged);
+					};
+		RoomDisposed += (sender, args) =>
+					{
+						InvokeAsync(StateHasChanged);
+					};
+	}
+
+	private void Join()
+	{
+		if (rooms.TryGetValue(joinKey, out joined))
+		{
+			joined.NewCardSet += (sender, card) =>
+						{
+							InvokeAsync(StateHasChanged);
+						};
+			joined.RoomDisposed += (sender, args) =>
+			{
+				joined = null;
+				InvokeAsync(StateHasChanged);
+			};
+			joinKey = String.Empty;
+			InvokeAsync(StateHasChanged);
+		}
+	}
+
+	public void Dispose()
+	{
+		if (rooms.Remove(ownRoom.PublicKey, out var removed))
+		{
+			removed.Dispose();
+		}
+	}
 }
