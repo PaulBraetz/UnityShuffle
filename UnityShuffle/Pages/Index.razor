@@ -121,7 +121,7 @@
 					@if (joined.Current != Room.Card.Empty)
 					{
 						<dt>
-							Current Card
+							Current Card @if(showNotification){<span class="text-success" style="cursor:pointer" @onclick="()=>showNotification=false">NEW</span>}
 						</dt>
 						<dd>
 							@joined.Current.Title
@@ -237,6 +237,7 @@
 
 	private Room? joined;
 	private String joinKey = String.Empty;
+	private Boolean showNotification;
 
 	private static event EventHandler? NewRoomCreated;
 	private static event EventHandler? RoomDisposed;
@@ -260,9 +261,13 @@
 	{
 		if (rooms.TryGetValue(joinKey, out joined))
 		{
-			joined.NewCardSet += (sender, card) =>
+			joined.NewCardSet += async (sender, card) =>
 						{
-							InvokeAsync(StateHasChanged);
+							showNotification = true;
+							await InvokeAsync(StateHasChanged);
+							await Task.Delay(30000);
+							showNotification = false;
+							await InvokeAsync(StateHasChanged);
 						};
 			joined.RoomDisposed += (sender, args) =>
 			{
