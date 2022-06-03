@@ -1,0 +1,24 @@
+﻿@page "/v/{Code}"
+@inherits SessionChild
+
+
+@code{
+	[Parameter]
+	public String? Code{ get; set; }
+
+	[Inject]
+	private NavigationManager? NavigationManager{ get; set; }
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if(Code != null)
+		{
+			var cudService = SessionParent.ServiceContext.GetService<ICUDService>();
+			var response = await cudService.Verify(new ICUDService.VerifyRequest()
+			{
+				VerificationCode = Code
+			});
+			NavigationManager!.NavigateTo("/");
+		}
+	}
+}

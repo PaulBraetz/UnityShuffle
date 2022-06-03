@@ -29,7 +29,7 @@ namespace UnityShuffle.Common
 		}
 		//Add Settings fields here, make them read/write as necessary
 		public IEnumerable<String> Locations { get; set; } = new[] {"Crusader","Hurston", "ArcCorp", "MicroTech" };
-		public TimeSpan MissionLifespan { get; set; } = TimeSpan.FromDays(84);
+		public TimeSpan MissionLifespan { get; set; } = TimeSpan.FromDays(28);
 		public Guid MissionAddedHubId { get; set; } = Guid.NewGuid();
 	}
 }

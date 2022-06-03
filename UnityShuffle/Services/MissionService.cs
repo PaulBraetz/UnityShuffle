@@ -1,9 +1,12 @@
 ﻿
 using PBApplication.Context.Abstractions;
 using PBApplication.Events;
+using PBApplication.Extensions;
+using PBApplication.Requests.Abstractions;
 using PBApplication.Responses;
 using PBApplication.Responses.Abstractions;
 using PBApplication.Services;
+using PBCommon.Extensions;
 using PBCommon.Validation;
 using PBData.Entities;
 using PBData.Extensions;
@@ -21,7 +24,7 @@ namespace UnityShuffle.Services
 
 		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionAdded;
 		public event ServiceEventHandler<ServiceEventArgs>? MissionRemoved;
-		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? EventUpdated;
+		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionUpdated;
 
 		public async Task<IResponse> AddMission(IMissionService.AddMissionRequest request)
 		{
@@ -46,6 +49,8 @@ namespace UnityShuffle.Services
 				{
 					return !String.IsNullOrWhiteSpace(request.Description);
 				}
+
+				Expire();
 
 				String name = request.Name.ToLower();
 				MissionEntity duplicate = Connection.GetSingle<MissionEntity>(m=>m.Name.ToLower().Equals(name));
@@ -94,66 +99,64 @@ namespace UnityShuffle.Services
 			return response;
 		}
 
-		public async Task<IResponse<MissionEntity>> GetMission(IMissionService.GetMissionRequest request)
+		public async Task<IGetPaginatedEncryptableResponse<MissionEntity>> GetMissions(IGetPaginatedRequest<IMissionService.GetMissionRequest> request)
 		{
-			var response = new Response<MissionEntity>();
+			var response = new GetPaginatedEncryptableResponse<MissionEntity>();
 
-			async Task requestNotNull()
+			async Task notNullRequest()
 			{
 				Expire();
 
 				IEnumerable<MissionEntity> query = Connection.Query<MissionEntity>();
 
-				if (!String.IsNullOrWhiteSpace(request.Name))
+				if (!String.IsNullOrWhiteSpace(request.Parameter.Name))
 				{
-					String name = request.Name.ToLower();
-					query = query.Where(m=>m.Name.ToLower().Contains(name));
+					String name = request.Parameter.Name.ToLower();
+					query = query.Where(m => m.Name.ToLower().Contains(name));
 				}
-				if (!String.IsNullOrWhiteSpace(request.Location))
+				if (!String.IsNullOrWhiteSpace(request.Parameter.Location))
 				{
-					String location = request.Location.ToLower();
+					String location = request.Parameter.Location.ToLower();
 					query = query.Where(m => m.Location.ToLower().Equals(location));
 				}
-				if (!String.IsNullOrWhiteSpace(request.Description))
+				if (!String.IsNullOrWhiteSpace(request.Parameter.Description))
 				{
-					String description = request.Description.ToLower();
+					String description = request.Parameter.Description.ToLower();
 					query = query.Where(m => m.Description.ToLower().Equals(description));
 				}
-				if (request.Aspects?.Any() ?? false)
+				if (request.Parameter.Aspects?.Any() ?? false)
 				{
 					String lowerCaseAspect = String.Empty;
-					foreach(var aspect in request.Aspects)
+					foreach (var aspect in request.Parameter.Aspects)
 					{
 						lowerCaseAspect = aspect.ToLower();
-						query = query.Where(m=>m.Aspects.Contains(lowerCaseAspect));
+						query = query.Where(m => m.Aspects.Contains(lowerCaseAspect));
 					}
 				}
-				if (request.MaxTime.HasValue)
+				if (request.Parameter.MaxTime.HasValue)
 				{
-					Int64 max = request.MaxTime.Value.Ticks;
-					query = query.Where(m=>m.Ratings.Average(r=>r.TimeTaken.Ticks) <= max);
+					Int64 max = request.Parameter.MaxTime.Value.Ticks;
+					query = query.Where(m => m.Ratings.Average(r => r.TimeTaken.Ticks) <= max);
 				}
 
-				query = query.ToList();
-
-				int last = query.Count()-1;
-				MissionEntity random = query.ElementAt(Random.Shared.Next(0, last));
+				query = query.OrderBy(m => m.CreationDate);
 
 				void successAction()
 				{
-					response.Overwrite(random);
+					response.LastPage = query.GetPageCount(request.PerPage) - 1;
+					response.Data = query.Paginate(request.PerPage, request.Page)
+						.CloneAsT()
+						.ToList();
 				}
 
-				await FirstNullCheck(random,
-						response.Validation.GetField(nameof(request)),
-						ValidationCode.NotFound)
+				await CachedCriterionChain.Cache.Get()
+					.NextValidatePagination(request, query)
 					.SetOnCriterionMet(successAction)
 					.Evaluate(response);
 			}
 
-			await FirstRequestNullCheck(request, response)
-				.SetOnCriterionMet(requestNotNull)
-				.CatchAll(ValidationField.Request)
+			await FirstParameterizedRequestNullCheck(request, response)
+				.SetOnCriterionMet(notNullRequest)
 				.Evaluate(response);
 
 			return response;
@@ -165,6 +168,8 @@ namespace UnityShuffle.Services
 
 			async Task notNullRequest()
 			{
+				Expire();
+
 				String name = request.Name?.ToLower()??String.Empty;
 				MissionEntity mission = Connection.GetSingle<MissionEntity>(m=>m.Name.ToLower().Equals(name));
 
@@ -182,7 +187,7 @@ namespace UnityShuffle.Services
 					Connection.Update(mission);
 					Connection.SaveChanges();
 
-					EventUpdated.Invoke(Session, mission, mission.CloneAsT());
+					MissionUpdated.Invoke(Session, mission, mission.CloneAsT());
 				}
 
 				await FirstValidateAuthenticated()

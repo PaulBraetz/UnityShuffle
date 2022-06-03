@@ -1,0 +1,34 @@
+﻿@inherits SessionChild
+
+<div class="d-flex flex-column">
+	<div class="mb-1">
+		<TextInput Label="Find Missions" OnEnterPressed="s=>List()" @bind-Value="name" />
+			<ResponseDropdown Response="missions"/>
+	</div>
+</div>
+
+@code {
+	private String name = String.Empty;
+
+	private IGetPaginatedResponse<MissionEntity>? missions = null;
+
+	private async Task List()
+	{
+		var request = new GetPaginatedRequest<IMissionService.GetMissionRequest>()
+			{
+				Page = 0,
+				PerPage = 10,
+				Parameter = new IMissionService.GetMissionRequest()
+				{
+					Name = name
+				}
+			};
+
+		var response = await SessionParent.ServiceContext.GetService<IMissionService>().GetMissions(request);
+
+		if(response.HasData()){
+			missions = response;
+			await InvokeAsync(StateHasChanged);
+		}
+	}
+}

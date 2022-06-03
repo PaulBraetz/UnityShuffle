@@ -1,0 +1,39 @@
+﻿@inherits SessionChild
+
+@if (notfier?.Data != null)
+{
+	<div class="rounded bg-info-t10">
+		<dl>
+			<dt>
+				<Localize Value="Name" />
+			</dt>
+			<dd>
+				@notfier.Data.Name
+			</dd>
+			<dt>
+				<Localize Value="Description" />
+			</dt>
+			<dd>
+				@notfier.Data.Description
+			</dd>
+			<dt>
+				<Localize Value="Average Completion Time" />
+			</dt>
+			<dd>
+				@SessionParent.Localize(TimeSpan.FromTicks((long)notfier.Data.Ratings.Select(r=>r.TimeTaken.Ticks).Average()), "hh:mm")
+			</dd>
+		</dl>
+	</div>
+}
+
+@code {
+	[Parameter]
+	public MissionEntity? Mission { get; set; }
+
+	private INotifyStateChange<MissionEntity?>? notfier;
+
+	protected override void OnParametersSetAndSessionInitialized()
+	{
+		notfier = GetNotifierFor(Mission);
+	}
+}
