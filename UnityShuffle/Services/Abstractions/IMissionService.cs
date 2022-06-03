@@ -20,7 +20,7 @@ namespace UnityShuffle.Services.Abstractions
 
 		//Recipients: Settings.MissionAddedHubId
 		//Payload: new mission
-		event ServiceEventHandler<ServiceEventArgs<MissionEntity>> MissionAdded;
+		event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionAdded;
 		sealed class AddMissionRequest
 		{
 			public String Name { get; set; } = String.Empty;
@@ -31,7 +31,7 @@ namespace UnityShuffle.Services.Abstractions
 		Task<IResponse> AddMission(AddMissionRequest request);
 
 		//Recipient: removed mission
-		event ServiceEventHandler<ServiceEventArgs> MissionRemoved;
+		event ServiceEventHandler<ServiceEventArgs>? MissionRemoved;
 		sealed class RemoveMissionRequest
 		{
 			public String Name { get; set; } = String.Empty;
@@ -40,12 +40,12 @@ namespace UnityShuffle.Services.Abstractions
 
 		//Recipient: updated mission
 		//Payload: updated mission
-		event ServiceEventHandler<ServiceEventArgs<MissionEntity>> EventUpdated;
+		event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? EventUpdated;
 		sealed class RateMissionRequest
 		{
 			public String Name { get; set; } = String.Empty;
 			public String Review { get; set; } = String.Empty;
-			public TimeSpan? Time { get; set; }
+			public TimeSpan? TimeTaken { get; set; }
 		}
 		Task<IResponse> RateMission(RateMissionRequest request);
 	}

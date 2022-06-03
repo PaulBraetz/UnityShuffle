@@ -11,20 +11,20 @@ namespace UnityShuffle.Data
 		public MissionRatingEntity(MissionRatingEntity from, IDictionary<Guid, Object> circularReferenceHelperDictionary) : base(from, circularReferenceHelperDictionary)
 		{
 			Review = from.Review;
-			Time = from.Time;
+			TimeTaken = from.TimeTaken;
 			Creator = from.Creator!.CloneAsT(circularReferenceHelperDictionary);
 		}
 
-		public MissionRatingEntity(String review, TimeSpan time, UserEntity creator)
+		public MissionRatingEntity(String review, TimeSpan timeTaken, UserEntity creator)
 		{
 			Review = review;
-			Time = time;
+			TimeTaken = timeTaken;
 			Creator = creator;
 		}
 
 		public virtual String Review { get; set; } = String.Empty;
-		public virtual TimeSpan Time { get; set; }
-		public virtual UserEntity? Creator { get; set; }
+		public virtual TimeSpan TimeTaken { get; set; }
+		public virtual UserEntity Creator { get; set; }
 
 		public override Object Clone(IDictionary<Guid, Object> circularReferenceHelperDictionary)
 		{

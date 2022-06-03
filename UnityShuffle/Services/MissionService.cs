@@ -19,9 +19,9 @@ namespace UnityShuffle.Services
 			Observe<IMissionService>(this);
 		}
 
-		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>> MissionAdded;
-		public event ServiceEventHandler<ServiceEventArgs> MissionRemoved;
-		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>> EventUpdated;
+		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionAdded;
+		public event ServiceEventHandler<ServiceEventArgs>? MissionRemoved;
+		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? EventUpdated;
 
 		public async Task<IResponse> AddMission(IMissionService.AddMissionRequest request)
 		{
@@ -131,7 +131,7 @@ namespace UnityShuffle.Services
 				if (request.MaxTime.HasValue)
 				{
 					Int64 max = request.MaxTime.Value.Ticks;
-					query = query.Where(m=>m.Ratings.Average(r=>r.Time.Ticks) <= max);
+					query = query.Where(m=>m.Ratings.Average(r=>r.TimeTaken.Ticks) <= max);
 				}
 
 				query = query.ToList();
@@ -170,12 +170,12 @@ namespace UnityShuffle.Services
 
 				Boolean validRequest()
 				{
-					return request.Time.HasValue || !String.IsNullOrEmpty(request.Review);
+					return request.TimeTaken.HasValue || !String.IsNullOrEmpty(request.Review);
 				}
 
 				void rate()
 				{
-					TimeSpan time = request.Time ?? TimeSpan.FromTicks((long)mission.Ratings.Average(r => r.Time.Ticks));
+					TimeSpan time = request.TimeTaken ?? TimeSpan.FromTicks((long)mission.Ratings.Average(r => r.TimeTaken.Ticks));
 					var rating = new MissionRatingEntity(request.Review, time, Session.User);
 					Connection.Insert(rating);
 					mission.Ratings.Add(rating);

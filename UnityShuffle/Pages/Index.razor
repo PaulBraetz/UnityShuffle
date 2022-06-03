@@ -3,260 +3,270 @@
 @using System.Collections.Concurrent
 @implements IDisposable
 
+
 <div class="d-flex flex-column">
-	<div class="d-flex justify-content-center">
-		<div class="rounded shadow d-flex flex-column m-2 p-2">
-			<dl class="mb-0">
-				<dt>
-					Active Rooms
-				</dt>
-				<dd>
-					@rooms.Count()
-				</dd>
-				<dt>
-					Your Room
-				</dt>
-				<dd>
-					@ownRoom.PublicKey
-				</dd>
-			</dl>
-			<span class="border-bottom my-3 border-dark"></span>
-			<label for="newCardTitleInput">
-				Title (Required)
-			</label>
-			<div>
-				<input id="newCardTitleInput" type="text" @bind-value="@newCardTitle" />
+	<div class="d-flex flex-row align-self-center">
+		<div class="d-flex flex-column">
+			<div class="d-flex justify-content-center">
+				<div class="rounded shadow d-flex flex-column m-2 p-2">
+					<Authorized>
+
+					</Authorized>
+				</div>
 			</div>
-			<label for="newCardTaskInput">
-				Task
-			</label>
-			<div>
-				<input id="newCardTaskInput" type="text" @bind-value="@newCardTask" />
-			</div>
-			<div class="mt-1">
-				<div class="btn-group">
-					@if (!String.IsNullOrWhiteSpace(newCardTitle))
-					{
-						<button class="btn btn-outline-primary" @onclick="()=>{
+		</div>
+		<div class="d-flex flex-column">
+				<div class="rounded shadow d-flex flex-column m-2 p-2">
+					<dl class="mb-0">
+						<dt>
+							Active Rooms
+						</dt>
+						<dd>
+							@rooms.Count()
+						</dd>
+						<dt>
+							Your Room
+						</dt>
+						<dd>
+							@ownRoom.PublicKey
+						</dd>
+					</dl>
+					<span class="border-bottom my-3 border-dark"></span>
+					<label for="newCardTitleInput">
+						Title (Required)
+					</label>
+					<div>
+						<input id="newCardTitleInput" type="text" @bind-value="@newCardTitle" />
+					</div>
+					<label for="newCardTaskInput">
+						Task
+					</label>
+					<div>
+						<input id="newCardTaskInput" type="text" @bind-value="@newCardTask" />
+					</div>
+					<div class="mt-1">
+						<div class="btn-group">
+							@if (!String.IsNullOrWhiteSpace(newCardTitle))
+							{
+								<button class="btn btn-outline-primary" @onclick="()=>{
 							ownRoom.Game.Add(new Room.Card(newCardTitle, newCardTask));
 							newCardTitle = string.Empty;
 							newCardTask = string.Empty;
 						}">
-							Add
-						</button>
-					}
-					else
-					{
-						<button class="btn btn-outline-primary" disabled>
-							Add
-						</button>
-					}
-					@if (ownRoom.Game.Deck.Any())
-					{
-						<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Shuffle">
-							Shuffle
-						</button>
-					}
-					else
-					{
-						<button class="btn btn-outline-primary" disabled>
-							Shuffle
-						</button>
-					}
-					@if (ownRoom.Game.Deck.Any())
-					{
-						<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Skip">
-							Skip
-						</button>
-					}
-					else
-					{
-						<button class="btn btn-outline-primary" disabled>
-							Skip
-						</button>
-					}
-
-					@if (ownRoom.Game.Deck.Any())
-					{
-						<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Draw">
-							Draw
-						</button>
-					}
-					else
-					{
-						<button class="btn btn-outline-primary" disabled>
-							Draw
-						</button>
-					}
-					@if (ownRoom.Game.Drawn.Any())
-					{
-						<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Join">
-							Join
-						</button>
-					}
-					else
-					{
-						<button class="btn btn-outline-primary" disabled>
-							Join
-						</button>
-					}
-				</div>
-			</div>
-			@if (ownRoom.Game.Cards.Any())
-			{
-				<dl class="ms-1">
-					@if (ownRoom.Game.Deck.Any())
-					{
-						<dt>
-							Deck
-						</dt>
-						<dd>
-							<ul>
-								@foreach (var card in ownRoom.Game.Deck)
-								{
-									<li>
-										<div class="d-flex flex-column">
-											<div>
-												@if (card == ownRoom.Game.Top)
-												{
-													<span class="text-primary">
-														@card.Title&nbsp;
-													</span>
-												}
-												else if (card == ownRoom.Game.Next)
-												{
-													<span class="text-info">
-														@card.Title&nbsp;
-													</span>
-												}
-												else
-												{
-													<span>
-														@card.Title&nbsp;
-													</span>
-												}
-												<span class="text-danger" style="cursor:pointer" @onclick="()=>ownRoom.Game.Remove(card)">
-													(remove)
-												</span>
-											</div>
-											@if (!String.IsNullOrWhiteSpace(card.Task))
-											{
-												<div class="pl-5">
-													&rarr; @card.Task
-												</div>
-											}
-										</div>
-									</li>
-								}
-							</ul>
-						</dd>
-					}
-					@if (ownRoom.Game.Drawn.Any())
-					{
-						<dt>
-							Drawn
-						</dt>
-						<dd>
-							<ul>
-								@foreach (var card in ownRoom.Game.Drawn)
-								{
-									<li>
-										<div class="d-flex flex-column">
-											<div>
-												@if (card == ownRoom.Game.Top)
-												{
-													<span class="text-primary">
-														@card.Title&nbsp;
-													</span>
-												}
-												else if (card == ownRoom.Game.Next)
-												{
-													<span class="text-info">
-														@card.Title&nbsp;
-													</span>
-												}
-												else
-												{
-													<span>
-														@card.Title&nbsp;
-													</span>
-												}
-												<span class="text-danger" style="cursor:pointer" @onclick="()=>ownRoom.Game.Remove(card)">
-													(remove)
-												</span>
-											</div>
-											@if (!String.IsNullOrWhiteSpace(card.Task))
-											{
-												<div class="pl-5">
-													&rarr; @card.Task
-												</div>
-											}
-										</div>
-									</li>
-								}
-							</ul>
-						</dd>
-					}
-				</dl>
-			}
-		</div>
-	</div>
-	<div class="d-flex justify-content-center">
-		<div class="rounded shadow d-flex flex-column m-2 p-2">
-			<label for="joinKeyInput">
-				Join Room
-			</label>
-			<div>
-				<input id="joinKeyInput" type="text" @bind-value="@joinKey" />
-			</div>
-			@if (!String.IsNullOrWhiteSpace(joinKey))
-			{
-				<div>
-					<button class="mt-1 btn btn-outline-primary" @onclick="Join">
-						Join
-					</button>
-				</div>
-			}
-			else
-			{
-				<div>
-					<button class="mt-1 btn btn-outline-primary" disabled>
-						Join
-					</button>
-				</div>
-			}
-			@if (joined != null)
-			{
-				<dl class="mt-1 mb-0">
-					<dt>
-						Joined
-					</dt>
-					<dd>
-						@joined.PublicKey
-					</dd>
-					@if (joined.Game.Top != Room.Card.Empty)
-					{
-						<dt>
-							Current Card @if (showNotification)
-							{
-								<span class="text-success" style="cursor:pointer" @onclick="()=>showNotification=false">NEW</span>
+									Add
+								</button>
 							}
-						</dt>
-						<dd>
-							@joined.Game.Top.Title
-						</dd>
-						@if (!string.IsNullOrWhiteSpace(joined.Game.Top.Task))
-						{
+							else
+							{
+								<button class="btn btn-outline-primary" disabled>
+									Add
+								</button>
+							}
+							@if (ownRoom.Game.Deck.Any())
+							{
+								<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Shuffle">
+									Shuffle
+								</button>
+							}
+							else
+							{
+								<button class="btn btn-outline-primary" disabled>
+									Shuffle
+								</button>
+							}
+							@if (ownRoom.Game.Deck.Any())
+							{
+								<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Skip">
+									Skip
+								</button>
+							}
+							else
+							{
+								<button class="btn btn-outline-primary" disabled>
+									Skip
+								</button>
+							}
+
+							@if (ownRoom.Game.Deck.Any())
+							{
+								<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Draw">
+									Draw
+								</button>
+							}
+							else
+							{
+								<button class="btn btn-outline-primary" disabled>
+									Draw
+								</button>
+							}
+							@if (ownRoom.Game.Drawn.Any())
+							{
+								<button class="btn btn-outline-primary" @onclick="ownRoom.Game.Join">
+									Join
+								</button>
+							}
+							else
+							{
+								<button class="btn btn-outline-primary" disabled>
+									Join
+								</button>
+							}
+						</div>
+					</div>
+					@if (ownRoom.Game.Cards.Any())
+					{
+						<dl class="ms-1">
+							@if (ownRoom.Game.Deck.Any())
+							{
+								<dt>
+									Deck
+								</dt>
+								<dd>
+									<ul>
+										@foreach (var card in ownRoom.Game.Deck)
+										{
+											<li>
+												<div class="d-flex flex-column">
+													<div>
+														@if (card == ownRoom.Game.Top)
+														{
+															<span class="text-primary">
+																@card.Title&nbsp;
+															</span>
+														}
+														else if (card == ownRoom.Game.Next)
+														{
+															<span class="text-info">
+																@card.Title&nbsp;
+															</span>
+														}
+														else
+														{
+															<span>
+																@card.Title&nbsp;
+															</span>
+														}
+														<span class="text-danger" style="cursor:pointer" @onclick="()=>ownRoom.Game.Remove(card)">
+															(remove)
+														</span>
+													</div>
+													@if (!String.IsNullOrWhiteSpace(card.Task))
+													{
+														<div class="pl-5">
+															&rarr; @card.Task
+														</div>
+													}
+												</div>
+											</li>
+										}
+									</ul>
+								</dd>
+							}
+							@if (ownRoom.Game.Drawn.Any())
+							{
+								<dt>
+									Drawn
+								</dt>
+								<dd>
+									<ul>
+										@foreach (var card in ownRoom.Game.Drawn)
+										{
+											<li>
+												<div class="d-flex flex-column">
+													<div>
+														@if (card == ownRoom.Game.Top)
+														{
+															<span class="text-primary">
+																@card.Title&nbsp;
+															</span>
+														}
+														else if (card == ownRoom.Game.Next)
+														{
+															<span class="text-info">
+																@card.Title&nbsp;
+															</span>
+														}
+														else
+														{
+															<span>
+																@card.Title&nbsp;
+															</span>
+														}
+														<span class="text-danger" style="cursor:pointer" @onclick="()=>ownRoom.Game.Remove(card)">
+															(remove)
+														</span>
+													</div>
+													@if (!String.IsNullOrWhiteSpace(card.Task))
+													{
+														<div class="pl-5">
+															&rarr; @card.Task
+														</div>
+													}
+												</div>
+											</li>
+										}
+									</ul>
+								</dd>
+							}
+						</dl>
+					}
+				</div>
+				<div class="rounded shadow d-flex flex-column m-2 p-2">
+					<label for="joinKeyInput">
+						Join Room
+					</label>
+					<div>
+						<input id="joinKeyInput" type="text" @bind-value="@joinKey" />
+					</div>
+					@if (!String.IsNullOrWhiteSpace(joinKey))
+					{
+						<div>
+							<button class="mt-1 btn btn-outline-primary" @onclick="Join">
+								Join
+							</button>
+						</div>
+					}
+					else
+					{
+						<div>
+							<button class="mt-1 btn btn-outline-primary" disabled>
+								Join
+							</button>
+						</div>
+					}
+					@if (joined != null)
+					{
+						<dl class="mt-1 mb-0">
 							<dt>
-								Current Task
+								Joined
 							</dt>
 							<dd>
-								@joined.Game.Top.Task
+								@joined.PublicKey
 							</dd>
-						}
+							@if (joined.Game.Top != Room.Card.Empty)
+							{
+								<dt>
+									Current Card @if (showNotification)
+									{
+										<span class="text-success" style="cursor:pointer" @onclick="()=>showNotification=false">NEW</span>
+									}
+								</dt>
+								<dd>
+									@joined.Game.Top.Title
+								</dd>
+								@if (!string.IsNullOrWhiteSpace(joined.Game.Top.Task))
+								{
+									<dt>
+										Current Task
+									</dt>
+									<dd>
+										@joined.Game.Top.Task
+									</dd>
+								}
+							}
+						</dl>
 					}
-				</dl>
-			}
+				</div>
 		</div>
 	</div>
 	<div class="d-flex justify-content-center">

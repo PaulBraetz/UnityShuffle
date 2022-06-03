@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using PBApp.Configuration;
 using UnityShuffle.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,55 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+
+var configuration = builder.Configuration;
+
+builder.Services.ConfigurePBApp(ca =>
+{
+	ca.ConfigurePBCommon(cc =>
+	{
+		cc.ConfigureSettingsInitializer(si =>
+		{
+
+		});
+	})
+	.ConfigurePBDataAccess(cda =>
+	{
+		cda.ConfigureSettingsInitializer(si =>
+		{
+
+		});
+	})
+	.ConfigurePBApplication(ca =>
+	{
+		ca.ConfigureSettingsInitializer(si =>
+		{
+
+		});
+	})
+	.ConfigurePBShared(cs =>
+	{
+		cs.ConfigureSettingsInitializer(si =>
+		{
+
+		});
+	})
+	.ConfigurePBServer(cs =>
+	{
+		cs.ConfigureSettingsInitializer(si =>
+		{
+			si.
+			si.UseEmailService = true;
+		});
+	})
+	.ConfigurePBFrontend(cf =>
+	{
+		cf.ConfigureSettingsInitializer(si =>
+		{
+			
+		});
+	});
+});
 
 var app = builder.Build();
 

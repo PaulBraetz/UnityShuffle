@@ -4,7 +4,7 @@ using PBData.Extensions;
 
 namespace UnityShuffle.Data
 {
-	public class MissionEntity:ExpiringEntityBase, IHasCreator<UserEntity>
+	public class MissionEntity : ExpiringEntityBase, IHasCreator<UserEntity>
 	{
 		public MissionEntity() { }
 		public MissionEntity(String name, String description, String location, UserEntity creator, TimeSpan lifeSpan, params String[] aspects) : base(lifeSpan, true, false)
@@ -32,6 +32,7 @@ namespace UnityShuffle.Data
 		public virtual IEnumerable<String> Aspects { get; set; } = Array.Empty<String>();
 		public virtual UserEntity? Creator { get; set; }
 		public virtual ICollection<MissionRatingEntity> Ratings { get; set; }
+		public override Boolean ExpiryPaused { get => Creator != null; set => _ = value; }
 
 		public override Object Clone(IDictionary<Guid, Object> circularReferenceHelperDictionary)
 		{

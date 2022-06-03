@@ -7,7 +7,7 @@ namespace UnityShuffle.Data.Mappings
 		public MissionRatingMapping()
 		{
 			Map(m=>m.Review).Length(PBData.Configuration.Settings.MaxStringFieldLength);
-			Map(m => m.Time);
+			Map(m => m.TimeTaken);
 			References(m=>m.Creator);
 		}
 	}

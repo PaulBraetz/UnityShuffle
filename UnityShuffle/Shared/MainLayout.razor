@@ -3,9 +3,18 @@
 <PageTitle>UnityShuffle</PageTitle>
 
 <div class="page">
-    <main>
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+	<main>
+		<article class="content px-4">
+			<SessionFrame>
+				<ConsentFrame>
+					<SessionFrameInitialized>
+						@Body
+					</SessionFrameInitialized>
+					<SessionFrameNotInitialized>
+						Loading
+					</SessionFrameNotInitialized>
+				</ConsentFrame>
+			</SessionFrame>
+		</article>
+	</main>
 </div>
