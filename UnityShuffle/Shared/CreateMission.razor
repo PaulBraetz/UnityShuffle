@@ -1,0 +1,53 @@
+﻿@inherits SessionChild
+
+<div class="d-flex flex-column">
+	<h5><Localize Value="Create Mission" /></h5>
+	<span class="py-1"></span>
+	<TextInput Label="@nameof(request.Name)"
+			   @bind-Value="request.Name"
+			   ValidationField="response.Validation.GetField(nameof(request.Name))" />
+	<Validation ValidationField="response.Validation.GetField(nameof(request.Name))" />
+	<span class="py-1"></span>
+	<TextInput Label="@nameof(request.Description)"
+			   @bind-Value="@request.Description"
+			   ValidationField="response.Validation.GetField(nameof(request.Description))" />
+	<Validation ValidationField="response.Validation.GetField(nameof(request.Description))" />
+	<span class="py-1"></span>
+	<TextInput Label="@nameof(request.Location)"
+			   @bind-Value="@request.Location"
+			   ValidationField="response.Validation.GetField(nameof(request.Location))" />
+	<Validation ValidationField="response.Validation.GetField(nameof(request.Location))" />
+	<span class="py-1"></span>
+	<TextInput Label="@nameof(request.Branches)"
+			   @bind-Value="@branches"
+			   ValidationField="response.Validation.GetField(nameof(request.Branches))" />
+	<Validation ValidationField="response.Validation.GetField(nameof(request.Branches))" />
+	<span class="py-1"></span>
+	<button class="btn btn-outline-@ButtonColor" @onclick="Submit">
+		<Localize Value="Submit" />@if(success){<span>&nbsp;<Icon T="Icon.Type.check"/></span>}
+	</button>
+</div>
+
+@code {
+	private IMissionService.CreateMissionRequest request = new IMissionService.CreateMissionRequest();
+	private String branches = String.Empty;
+	private IResponse response = new Response();
+	private Boolean success = false;
+	private String ButtonColor => success?"success":"primary";
+
+	private async Task Submit()
+	{
+		success = false;
+		await InvokeAsync(StateHasChanged);
+		request.Branches = branches.Split(',', StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
+		response = await SessionParent.ServiceContext.GetService<IMissionService>().CreateMission(request);
+		if (response.Validation.NoneInvalid)
+		{
+			request = new IMissionService.CreateMissionRequest();
+			branches = String.Empty;
+			response = new Response();
+			success = true;
+		}
+		await InvokeAsync(StateHasChanged);
+	}
+}

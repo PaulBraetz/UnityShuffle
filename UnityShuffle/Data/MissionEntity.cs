@@ -12,7 +12,7 @@ namespace UnityShuffle.Data
 			Name = name;
 			Description = description;
 			Location = location;
-			Aspects = aspects;
+			Branches = aspects;
 			Ratings = new List<MissionRatingEntity>();
 			Creator = creator;
 		}
@@ -21,7 +21,7 @@ namespace UnityShuffle.Data
 			Name = from.Name;
 			Description = from.Description;
 			Location = from.Location;
-			Aspects = from.Aspects.ToArray();
+			Branches = from.Branches.ToArray();
 			Ratings = from.Ratings.CloneAsT(circularReferenceHelperDictionary).ToList();
 			Creator = from.Creator.CloneAsT(circularReferenceHelperDictionary);
 		}
@@ -29,8 +29,17 @@ namespace UnityShuffle.Data
 		public virtual String Name { get; set; } = String.Empty;
 		public virtual String Description { get; set; } = String.Empty;
 		public virtual String Location { get; set; } = String.Empty;
-		public virtual IEnumerable<String> Aspects { get; set; } = Array.Empty<String>();
-		public virtual UserEntity? Creator { get; set; }
+		public virtual IEnumerable<String> Branches { get; set; } = Array.Empty<String>();
+
+		private UserEntity? creator;
+		public virtual UserEntity? Creator
+		{
+			get => creator; set
+			{
+				creator = value;
+				RefreshNow();
+			}
+		}
 		public virtual ICollection<MissionRatingEntity> Ratings { get; set; }
 		public override Boolean ExpiryPaused { get => Creator != null; set => _ = value; }
 

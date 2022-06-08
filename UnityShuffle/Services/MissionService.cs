@@ -22,38 +22,38 @@ namespace UnityShuffle.Services
 			Observe<IMissionService>(this);
 		}
 
-		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionAdded;
-		public event ServiceEventHandler<ServiceEventArgs>? MissionRemoved;
+		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionCreated;
+		public event ServiceEventHandler<ServiceEventArgs>? MissionDeleted;
 		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionUpdated;
 
-		public async Task<IResponse> AddMission(IMissionService.AddMissionRequest request)
+		public async Task<IResponse> CreateMission(IMissionService.CreateMissionRequest request)
 		{
 			var response = new Response();
 
-			Boolean validName()
-			{
-				return !String.IsNullOrWhiteSpace(request.Name);
-			}
-
 			async Task notNullRequest()
 			{
+				Boolean validName()
+				{
+					return request.Name.IsWithinLimitsAndAlphanumeric(Common.Settings.MinMissionNameChars, Common.Settings.MaxMissionNameChars);
+				}
+
 				Boolean validLocation()
 				{
 					return Common.Settings.Locations.Contains(request.Location);
 				}
 				Boolean validAspects()
 				{
-					return request.Aspects.All(a => Common.Settings.Locations.Contains(a));
+					return request.Branches.All(a => Common.Settings.Branches.Contains(a));
 				}
 				Boolean validDescription()
 				{
-					return !String.IsNullOrWhiteSpace(request.Description);
+					return request.Description.IsWithinLimitsAndAlphanumeric(Common.Settings.MinMissionNameChars, Common.Settings.MaxMissionNameChars);
 				}
 
 				Expire();
 
 				String name = request.Name.ToLower();
-				MissionEntity duplicate = Connection.GetSingle<MissionEntity>(m=>m.Name.ToLower().Equals(name));
+				MissionEntity duplicate = Connection.GetSingle<MissionEntity>(m => m.Name.ToLower().Equals(name));
 
 				void successAction()
 				{
@@ -61,37 +61,39 @@ namespace UnityShuffle.Services
 														request.Description,
 														request.Location,
 														Session.User,
-														Common.Settings.MissionLifespan);
+														Common.Settings.MissionLifespan)
+					{
+						Branches = request.Branches
+					};
 					newMission.RefreshNow();
 
 					Connection.Insert(newMission);
 					Connection.SaveChanges();
 
-					MissionAdded.Invoke(Session, Common.Settings.MissionAddedHubId, newMission.CloneAsT());
+					MissionCreated.Invoke(Session, Common.Settings.MissionCreatedHubId, newMission.CloneAsT());
 				}
 
-				await FirstValidateAuthenticated()
+				await FirstCompound(validName,
+						response.Validation.GetField(nameof(request.Name)),
+						ValidationCode.Invalid.SerializeMessage("Please make sure the name provided is alphanumeric and between {0} and {1} characters.", Common.Settings.MinMissionNameChars, Common.Settings.MaxMissionNameChars))
 					.NextCompound(validLocation,
 						response.Validation.GetField(nameof(request.Location)),
-						ValidationCode.Invalid)
+						ValidationCode.Invalid.SerializeMessage("Please make sure the location provided is one of the following: {0}.", String.Join(", ", Common.Settings.Locations)))
 					.NextCompound(validAspects,
-						response.Validation.GetField(nameof(request.Aspects)),
-						ValidationCode.Invalid)
+						response.Validation.GetField(nameof(request.Branches)),
+						ValidationCode.Invalid.SerializeMessage("Please make sure the branches provided are valid. Valid branches are: {0}.", String.Join(", ", Common.Settings.Branches)))
 					.NextCompound(validDescription,
 						response.Validation.GetField(nameof(request.Description)),
-						ValidationCode.Invalid)
+						ValidationCode.Invalid.SerializeMessage("Please make sure the description provided is alphanumeric and between {0} and {1} characters.", Common.Settings.MinMissionDescriptionChars, Common.Settings.MaxMissionDescriptionChars))
 					.NextNullCheck(duplicate,
 						response.Validation.GetField(nameof(request.Name)),
-						ValidationCode.Duplicate)
+						ValidationCode.Duplicate.WithMessage("This name is already taken."))
 					.InvertCriterion()
 					.SetOnCriterionMet(successAction)
 					.Evaluate(response);
 			}
 
 			await FirstRequestNullCheck(request, response)
-				.NextCompound(validName,
-					response.Validation.GetField(nameof(request.Name)),
-					ValidationCode.Invalid)
 				.SetOnCriterionMet(notNullRequest)
 				.CatchAll(ValidationField.Request)
 				.Evaluate(response);
@@ -130,7 +132,7 @@ namespace UnityShuffle.Services
 					foreach (var aspect in request.Parameter.Aspects)
 					{
 						lowerCaseAspect = aspect.ToLower();
-						query = query.Where(m => m.Aspects.Contains(lowerCaseAspect));
+						query = query.Where(m => m.Branches.Contains(lowerCaseAspect));
 					}
 				}
 				if (request.Parameter.MaxTime.HasValue)
@@ -170,8 +172,8 @@ namespace UnityShuffle.Services
 			{
 				Expire();
 
-				String name = request.Name?.ToLower()??String.Empty;
-				MissionEntity mission = Connection.GetSingle<MissionEntity>(m=>m.Name.ToLower().Equals(name));
+				String name = request.Name?.ToLower() ?? String.Empty;
+				MissionEntity mission = Connection.GetSingle<MissionEntity>(m => m.Name.ToLower().Equals(name));
 
 				Boolean validRequest()
 				{
@@ -209,11 +211,12 @@ namespace UnityShuffle.Services
 			return response;
 		}
 
-		public async Task<IResponse> RemoveMission(IMissionService.RemoveMissionRequest request)
+		public async Task<IResponse> DeleteMission(IMissionService.DeleteMissionRequest request)
 		{
 			var response = new Response();
 
-			async Task requestNotNull(){
+			async Task requestNotNull()
+			{
 				Expire();
 
 				MissionEntity mission = Connection.GetSingle<MissionEntity>(m => m.Name.Equals(request.Name));
@@ -226,7 +229,7 @@ namespace UnityShuffle.Services
 				void successAction()
 				{
 					Connection.DeleteAndSaveChanges(mission);
-					MissionRemoved.Invoke(mission);
+					MissionDeleted.Invoke(mission);
 				}
 
 				await FirstValidateAuthenticated()
@@ -255,7 +258,7 @@ namespace UnityShuffle.Services
 			void remove(MissionEntity m)
 			{
 				Connection.DeleteAndSaveChanges(m);
-				MissionRemoved.Invoke(m);
+				MissionDeleted.Invoke(m);
 			}
 		}
 	}

@@ -34,7 +34,7 @@ builder.Services.ConfigurePBApp(ca =>
 			{
 
 			});
-			cda.UseMappingConfiguration(m => m.Add<MissionMapping>().Add<MissionRatingMapping>());
+			cda.UseMappingConfiguration(m => m.AddFromAssemblyOf<Program>());
 			String connectionString = configuration.GetConnectionString("Production");
 #if DEBUG
 			Console.WriteLine("Use Production Connection? (Y)");

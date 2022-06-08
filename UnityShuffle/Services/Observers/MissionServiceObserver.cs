@@ -12,8 +12,8 @@ namespace UnityShuffle.Services.Observers
 		public override void Observe(IMissionService service)
 		{
 			service.MissionUpdated += args => Send(nameof(IMissionService.MissionUpdated), args);
-			service.MissionAdded += args => Send(nameof(IMissionService.MissionAdded), args);
-			service.MissionRemoved += args => Send(nameof(IMissionService.MissionRemoved), args);
+			service.MissionCreated += args => Send(nameof(IMissionService.MissionCreated), args);
+			service.MissionDeleted += args => Send(nameof(IMissionService.MissionDeleted), args);
 		}
 	}
 }

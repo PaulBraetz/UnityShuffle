@@ -5,16 +5,28 @@
 	<div class="rounded bg-info-t10">
 		<dl>
 			<dt>
-				<Localize Value="Name" />
+				<Localize Value="@nameof(MissionEntity.Name)" />
 			</dt>
 			<dd>
 				@notfier.Data.Name
 			</dd>
 			<dt>
-				<Localize Value="Description" />
+				<Localize Value="@nameof(MissionEntity.Description)" />
 			</dt>
 			<dd>
 				@notfier.Data.Description
+			</dd>
+			<dt>
+				<Localize Value="@nameof(MissionEntity.Location)" />
+			</dt>
+			<dd>
+				@notfier.Data.Location
+			</dd>
+			<dt>
+				<Localize Value="@nameof(MissionEntity.Branches)" />
+			</dt>
+			<dd>
+				@String.Join(", ", notfier.Data.Branches)
 			</dd>
 			<dt>
 				<Localize Value="Average Completion Time" />

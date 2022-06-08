@@ -5,60 +5,33 @@
 		<div class="d-flex flex-column">
 			<div class="d-flex justify-content-center">
 				<div class="rounded shadow d-flex flex-column m-2 p-2">
-					<Authorized>
-						<CollapseFrame>
-							<CollapseText>
-								<CollapseChevron /><Localize Value="Change Email" />
-							</CollapseText>
-							<WhenNotCollapsed>
-								<ChangeEmailPreset />
-							</WhenNotCollapsed>
-						</CollapseFrame>
-						<CollapseFrame>
-							<CollapseText>
-								<CollapseChevron /><Localize Value="Change Password" />
-							</CollapseText>
-							<WhenNotCollapsed>
-								<ChangePasswordPreset />
-							</WhenNotCollapsed>
-						</CollapseFrame>
-						<LogoutPreset />
-					</Authorized>
-					<NotAuthorized>
-						<CollapseFrame>
-							<CollapseText>
-								<CollapseChevron /><Localize Value="Register" />
-							</CollapseText>
-							<WhenNotCollapsed>
-								<RegisterPreset />
-							</WhenNotCollapsed>
-						</CollapseFrame>
-						<CollapseFrame>
-							<CollapseText>
-								<CollapseChevron /><Localize Value="Login" />
-							</CollapseText>
-							<WhenNotCollapsed>
-								<LoginPreset />
-							</WhenNotCollapsed>
-						</CollapseFrame>
-						<CollapseFrame>
-							<CollapseText>
-								<CollapseChevron /><Localize Value="Forgot Password" />
-							</CollapseText>
-							<WhenNotCollapsed>
-								<ForgotPasswordPreset />
-							</WhenNotCollapsed>
-						</CollapseFrame>
-					</NotAuthorized>
+					<User/>
 				</div>
 			</div>
 		</div>
 		<div class="d-flex flex-column">
 			<div class="rounded shadow d-flex flex-column m-2 p-2">
-				<ManageRoom />
+				<CreateMission />
 			</div>
+		</div>
+		<div class="d-flex flex-column">
 			<div class="rounded shadow d-flex flex-column m-2 p-2">
-				<JoinRoom />
+				<StateMachineFrame>
+					<TabFrame>
+						<Tab State="0">
+							Host Room
+						</Tab>
+						<Tab State="1">
+							Join Room
+						</Tab>
+					</TabFrame>
+					<Step State="0">
+						<ManageRoom/>
+					</Step>
+					<Step State="1">
+						<JoinRoom/>
+					</Step>
+				</StateMachineFrame>
 			</div>
 		</div>
 	</div>
