@@ -109,17 +109,17 @@ namespace UnityShuffle.Services.Abstractions
 		Task<IResponse> Add(String roomName, String missionName);
 
 		//Recipient: Affected Room
-		//Payload: Removed Mission
-		event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionRemoved;
+		//Payload: Affected Room
+		event ServiceEventHandler<ServiceEventArgs<RoomDto>>? MissionRemoved;
 		Task<IResponse> Remove(String roomName, String missionName);
 
 		//Recipient: Affected Room
-		//Payload: Room
+		//Payload: Affected Room
 		event ServiceEventHandler<ServiceEventArgs<RoomDto>>? RoomShuffled;
 		Task<IResponse> Shuffle(String roomName);
 
 		//Recipient: Affected Room
-		//Payload: Room
+		//Payload: Affected Room
 		event ServiceEventHandler<ServiceEventArgs<RoomDto>>? RoomJoined;
 		Task<IResponse> Join(String roomName);
 
