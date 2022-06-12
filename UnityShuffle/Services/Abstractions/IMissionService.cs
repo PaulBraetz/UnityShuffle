@@ -53,20 +53,17 @@ namespace UnityShuffle.Services.Abstractions
 		}
 		Task<IResponse> RateMission(RateMissionRequest request);
 
-		//Recipient: Expired Room
-		event ServiceEventHandler<ServiceEventArgs>? RoomExpired;
-
 		sealed class RoomDto : EncryptableBase<Guid>, IOverwritable<RoomDto>
 		{
 			public RoomDto(RoomEntity room)
 			{
-				JoinKey = room.JoinKey;
+				Name = room.Name;
 				Next = room.Next;
 				deck = room.Deck.ToList();
 				Top = room.Top;
 				drawn = room.Drawn.ToList();
 			}
-			public String JoinKey { get; private set; }
+			public String Name { get; private set; }
 			public MissionEntity? Next { get; private set; }
 			private ICollection<MissionEntity> deck;
 			public IEnumerable<MissionEntity> Deck => deck;
@@ -76,7 +73,7 @@ namespace UnityShuffle.Services.Abstractions
 
 			public RoomDto Overwrite(RoomDto with)
 			{
-				JoinKey = with.JoinKey;
+				Name = with.Name;
 				Next = with.Next;
 				deck = with.deck;
 				Top = with.Top;
@@ -95,30 +92,47 @@ namespace UnityShuffle.Services.Abstractions
 					Drawn.SafeEncrypt(encryptor));
 			}
 		}
-		Task<IEncryptableResponse<RoomDto>> GetRoom();
 
-		event ServiceEventHandler<ServiceEventArgs<RoomDto>> MissionAdded;
-		Task<IResponse> Add(String missionName);
+		sealed class CreateRoomRequest
+		{
+			public String? RoomName { get; set; }
+		}
+		Task<IResponse> CreateRoom(CreateRoomRequest request);
 
-		event ServiceEventHandler<ServiceEventArgs<MissionEntity>> MissionRemoved;
-		Task<IResponse> Remove(String missionName);
-
-		event ServiceEventHandler<ServiceEventArgs<MissionEntity>> RoomShuffled;
-		Task<IResponse> Shuffle();
-
-		event ServiceEventHandler<ServiceEventArgs<MissionEntity>> RoomJoined;
-		Task<IResponse> Join();
+		//Recipient: Closed Room
+		event ServiceEventHandler<ServiceEventArgs>? RoomClosed;
+		Task<IResponse> CloseRoom(String roomName);
 
 		//Recipient: Affected Room
-		//Payload: Drawn Mission
-		event ServiceEventHandler<ServiceEventArgs<MissionEntity?>>? MissionDrawn;
-		Task<IResponse> Draw();
+		//Payload: Affected Room
+		event ServiceEventHandler<ServiceEventArgs<RoomDto>>? MissionAdded;
+		Task<IResponse> Add(String roomName, String missionName);
 
 		//Recipient: Affected Room
-		//Payload: Drawn Mission
-		event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionSkipped;
-		Task<IResponse> Skip();
+		//Payload: Removed Mission
+		event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionRemoved;
+		Task<IResponse> Remove(String roomName, String missionName);
 
-		Task<IEncryptableResponse<RoomDto>> GetRoom(String joinKey);
+		//Recipient: Affected Room
+		//Payload: Room
+		event ServiceEventHandler<ServiceEventArgs<RoomDto>>? RoomShuffled;
+		Task<IResponse> Shuffle(String roomName);
+
+		//Recipient: Affected Room
+		//Payload: Room
+		event ServiceEventHandler<ServiceEventArgs<RoomDto>>? RoomJoined;
+		Task<IResponse> Join(String roomName);
+
+		//Recipient: Affected Room
+		//Payload: Affected Room
+		event ServiceEventHandler<ServiceEventArgs<RoomDto>>? MissionDrawn;
+		Task<IResponse> Draw(String roomName);
+
+		//Recipient: Affected Room
+		//Payload: Affected Room
+		event ServiceEventHandler<ServiceEventArgs<RoomDto>>? MissionSkipped;
+		Task<IResponse> Skip(String roomName);
+
+		Task<IEncryptableResponse<RoomDto>> GetRoom(String name);
 	}
 }

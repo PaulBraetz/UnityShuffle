@@ -5,7 +5,7 @@ using PBData.Extensions;
 
 namespace UnityShuffle.Data
 {
-	public class RoomEntity : ExpiringEntityBase, ISessionAttachment
+	public class RoomEntity : ExpiringEntityBase, ISessionAttachment, IHasName
 	{
 		public RoomEntity()
 		{
@@ -13,17 +13,17 @@ namespace UnityShuffle.Data
 
 		protected RoomEntity(RoomEntity from, IDictionary<Guid, Object> circularReferenceHelperDictionary) : base(from, circularReferenceHelperDictionary)
 		{
-			JoinKey = from.JoinKey;
+			Name = from.Name;
 			Drawn = from.Drawn.CloneAsT(circularReferenceHelperDictionary);
 			Deck = from.Deck.CloneAsT(circularReferenceHelperDictionary);
 		}
 
-		public RoomEntity(String joinKey) : base(TimeSpan.MinValue, true, false)
+		public RoomEntity(String name) : base(TimeSpan.MinValue, true, false)
 		{
-			JoinKey = joinKey;
+			Name = name;
 		}
 
-		public virtual String JoinKey { get; protected set; }
+		public virtual String Name { get; protected set; }
 
 		public virtual MissionEntity? Top { get => drawn.TryPeek(out MissionEntity? top) ? top : null; set => _ = value; }
 		private Stack<MissionEntity> drawn = new();
@@ -36,8 +36,6 @@ namespace UnityShuffle.Data
 		public override Boolean ExpiryPaused { get => IsAttached; set => _ = value; }
 
 		protected virtual Boolean IsAttached { get; set; }
-
-		public event EventHandler<MissionEntity?>? CardDrawn;
 
 		public void Add(MissionEntity mission)
 		{
@@ -65,11 +63,6 @@ namespace UnityShuffle.Data
 
 				stack = newStack;
 			}
-
-			if (top != Top)
-			{
-				CardDrawn?.Invoke(this, Top);
-			}
 		}
 
 		public void Shuffle()
@@ -96,7 +89,6 @@ namespace UnityShuffle.Data
 			{
 				deck.Push(m);
 			}
-			CardDrawn?.Invoke(this, Top);
 		}
 
 		public void Draw()
@@ -104,7 +96,6 @@ namespace UnityShuffle.Data
 			if (deck.TryPop(out MissionEntity? c))
 			{
 				drawn.Push(c);
-				CardDrawn?.Invoke(this, drawn.Peek());
 			}
 		}
 

@@ -6,7 +6,7 @@ namespace UnityShuffle.Data.Mappings
 	{
 		public RoomMapping()
 		{
-			Map(m=>m.JoinKey).Length(PBData.Configuration.Settings.MaxStringFieldLength);
+			Map(m=>m.Name).Length(PBData.Configuration.Settings.MaxStringFieldLength);
 			HasManyToMany(m => m.Deck);
 			HasManyToMany(m => m.Drawn);
 		}
