@@ -378,7 +378,7 @@ namespace UnityShuffle.Services
 
 		public Task<IResponse> Shuffle(String roomName)
 		{
-			async void skip(RoomEntity room)
+			void shuffle(RoomEntity room)
 			{
 				room!.Shuffle();
 				Connection.Update(room);
@@ -387,12 +387,12 @@ namespace UnityShuffle.Services
 				RoomShuffled.Invoke(Session, room, new IMissionService.RoomDto(room.CloneAsT()));
 			}
 
-			return RoomAction(roomName, skip);
+			return RoomAction(roomName, shuffle);
 		}
 
 		public Task<IResponse> Join(String roomName)
 		{
-			async void skip(RoomEntity room)
+			void join(RoomEntity room)
 			{
 				room!.Join();
 				Connection.Update(room);
@@ -401,12 +401,12 @@ namespace UnityShuffle.Services
 				RoomJoined.Invoke(Session, room, new IMissionService.RoomDto(room.CloneAsT()));
 			}
 
-			return RoomAction(roomName, skip);
+			return RoomAction(roomName, join);
 		}
 
 		public Task<IResponse> Draw(String roomName)
 		{
-			async void skip(RoomEntity room)
+			void draw(RoomEntity room)
 			{
 				room!.Draw();
 				Connection.Update(room);
@@ -415,12 +415,12 @@ namespace UnityShuffle.Services
 				MissionDrawn.Invoke(Session, room, new IMissionService.RoomDto(room.CloneAsT()));
 			}
 
-			return RoomAction(roomName, skip);
+			return RoomAction(roomName, draw);
 		}
 
 		public Task<IResponse> Skip(String roomName)
 		{
-			async void skip(RoomEntity room)
+			void skip(RoomEntity room)
 			{
 				room!.Skip();
 				Connection.Update(room);
