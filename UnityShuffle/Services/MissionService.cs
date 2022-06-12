@@ -25,7 +25,7 @@ namespace UnityShuffle.Services
 
 		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionCreated;
 		public event ServiceEventHandler<ServiceEventArgs>? MissionDeleted;
-		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionUpdated;
+		public event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionRated;
 		public event ServiceEventHandler<ServiceEventArgs>? RoomClosed;
 		public event ServiceEventHandler<ServiceEventArgs<IMissionService.RoomDto>>? MissionAdded;
 		public event ServiceEventHandler<ServiceEventArgs<IMissionService.RoomDto>>? MissionRemoved;
@@ -197,7 +197,7 @@ namespace UnityShuffle.Services
 					Connection.Update(mission);
 					Connection.SaveChanges();
 
-					MissionUpdated.Invoke(Session, mission, mission.CloneAsT());
+					MissionRated.Invoke(Session, mission, mission.CloneAsT());
 				}
 
 				await FirstValidateAuthenticated()

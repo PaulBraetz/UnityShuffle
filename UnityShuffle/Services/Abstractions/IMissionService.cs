@@ -44,7 +44,7 @@ namespace UnityShuffle.Services.Abstractions
 
 		//Recipient: updated mission
 		//Payload: updated mission
-		event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionUpdated;
+		event ServiceEventHandler<ServiceEventArgs<MissionEntity>>? MissionRated;
 		sealed class RateMissionRequest
 		{
 			public String Name { get; set; } = String.Empty;
@@ -57,12 +57,14 @@ namespace UnityShuffle.Services.Abstractions
 		{
 			public RoomDto(RoomEntity room)
 			{
+				HubId = room.HubId;
 				Name = room.Name;
 				Next = room.Next;
 				deck = room.Deck.ToList();
 				Top = room.Top;
 				drawn = room.Drawn.ToList();
 			}
+			public Guid HubId { get; private set; }
 			public String Name { get; private set; }
 			public MissionEntity? Next { get; private set; }
 			private ICollection<MissionEntity> deck;
@@ -73,6 +75,7 @@ namespace UnityShuffle.Services.Abstractions
 
 			public RoomDto Overwrite(RoomDto with)
 			{
+				HubId = with.HubId;
 				Name = with.Name;
 				Next = with.Next;
 				deck = with.deck;
