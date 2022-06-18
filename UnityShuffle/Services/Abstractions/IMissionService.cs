@@ -17,7 +17,7 @@ namespace UnityShuffle.Services.Abstractions
 			public String Name { get; set; } = String.Empty;
 			public String Location { get; set; } = String.Empty;
 			public String Description { get; set; } = String.Empty;
-			public IEnumerable<String> Aspects { get; set; } = Array.Empty<String>();
+			public IEnumerable<String> Branches { get; set; } = Array.Empty<String>();
 			public TimeSpan? MaxTime { get; set; }
 		}
 		Task<IGetPaginatedEncryptableResponse<MissionEntity>> GetMissions(IGetPaginatedRequest<GetMissionRequest> request);

@@ -11,6 +11,7 @@ using PBCommon.Extensions;
 using PBCommon.Validation;
 using PBData.Entities;
 using PBData.Extensions;
+using UnityShuffle.Common;
 using UnityShuffle.Data;
 using UnityShuffle.Services.Abstractions;
 
@@ -37,7 +38,8 @@ namespace UnityShuffle.Services
 		private MissionEntity? GetMissionEntity(String? name)
 		{
 			ExpireMissions();
-			return Connection.GetSingle<MissionEntity>(m => m.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+			name = name?.ToLowerInvariant() ?? String.Empty;
+			return Connection.GetSingle<MissionEntity>(m => m.Name.Equals(name));
 		}
 
 		public async Task<IResponse> CreateMission(IMissionService.CreateMissionRequest request)
@@ -48,20 +50,20 @@ namespace UnityShuffle.Services
 			{
 				Boolean validName()
 				{
-					return request.Name.IsWithinLimitsAndAlphanumeric(Common.Settings.MinMissionNameChars, Common.Settings.MaxMissionNameChars);
+					return request.Name.IsValidMissionName();
 				}
 
 				Boolean validLocation()
 				{
 					return Common.Settings.Locations.Contains(request.Location);
 				}
-				Boolean validAspects()
+				Boolean validBranches()
 				{
 					return request.Branches.All(a => Common.Settings.Branches.Contains(a));
 				}
 				Boolean validDescription()
 				{
-					return request.Description.IsWithinLimitsAndAlphanumeric(Common.Settings.MinMissionNameChars, Common.Settings.MaxMissionNameChars);
+					return request.Description.IsValidMissionDescription();
 				}
 
 				MissionEntity? duplicate = GetMissionEntity(request.Name);
@@ -90,7 +92,7 @@ namespace UnityShuffle.Services
 					.NextCompound(validLocation,
 						response.EnsureField(nameof(request.Location)),
 						ValidationCode.Invalid.SerializeMessage("Please make sure the location provided is one of the following: {0}.", String.Join(", ", Common.Settings.Locations)))
-					.NextCompound(validAspects,
+					.NextCompound(validBranches,
 						response.EnsureField(nameof(request.Branches)),
 						ValidationCode.Invalid.SerializeMessage("Please make sure the branches provided are valid. Valid branches are: {0}.", String.Join(", ", Common.Settings.Branches)))
 					.NextCompound(validDescription,
@@ -137,13 +139,13 @@ namespace UnityShuffle.Services
 					String description = request.Parameter.Description.ToLower();
 					query = query.Where(m => m.Description.ToLower().Equals(description));
 				}
-				if (request.Parameter.Aspects?.Any() ?? false)
+				if (request.Parameter.Branches?.Any() ?? false)
 				{
-					String lowerCaseAspect = String.Empty;
-					foreach (var aspect in request.Parameter.Aspects)
+					String lowerCaseBranch = String.Empty;
+					foreach (var branch in request.Parameter.Branches)
 					{
-						lowerCaseAspect = aspect.ToLower();
-						query = query.Where(m => m.Branches.Contains(lowerCaseAspect));
+						lowerCaseBranch = branch.ToLower();
+						query = query.Where(m => m.Branches.Contains(lowerCaseBranch));
 					}
 				}
 				if (request.Parameter.MaxTime.HasValue)
@@ -270,7 +272,8 @@ namespace UnityShuffle.Services
 
 		private RoomEntity? GetAttachedRoomEntity(String? roomName)
 		{
-			return Session.GetAttached<RoomEntity>(Connection).SingleOrDefault(r => r.Name.Equals(roomName, StringComparison.InvariantCultureIgnoreCase));
+			roomName = roomName?.ToLowerInvariant() ?? roomName;
+			return Session.GetAttached<RoomEntity>(Connection).SingleOrDefault(r => r.Name.Equals(roomName));
 		}
 
 		private async Task<IResponse> RoomAction(String roomName, Action<RoomEntity> action)
@@ -434,7 +437,8 @@ namespace UnityShuffle.Services
 
 		private RoomEntity? GetRoomEntity(String? name)
 		{
-			return Connection.GetSingle<RoomEntity>(r => r.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+			name = name?.ToLowerInvariant() ?? name; ;
+			return Connection.GetSingle<RoomEntity>(r => r.Name.Equals(name));
 		}
 
 		public async Task<IEncryptableResponse<IMissionService.RoomDto>> GetRoom(String name)

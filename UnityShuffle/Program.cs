@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using PBApp.Configuration;
 using PBServer.Configuration;
+using System.Reflection;
 using UnityShuffle.Data;
 using UnityShuffle.Data.Mappings;
 using UnityShuffle.Events;
@@ -25,8 +26,9 @@ builder.Services.ConfigurePBApp(ca =>
 #if DEBUG
 				si.Url = configuration.GetSection("SetupData").GetSection("URL").GetValue<String>("Development");
 #endif
-
+				si.DefaultCultureName = "de-DE";
 			});
+			cc.AddLocalizationResource("UnityShuffle.Resources.Strings", Assembly.GetExecutingAssembly());
 		})
 		.ConfigurePBDataAccess(cda =>
 		{
@@ -102,7 +104,7 @@ builder.Services.ConfigurePBApp(ca =>
 			});
 
 			cs.SetDBConnectedServiceContextImplementation<ServiceContext>()
-				.SetUseDefaultControllers(false);
+				.SetUseDefaultControllers(true);
 		})
 		.ConfigurePBFrontend(cf =>
 		{
@@ -119,13 +121,14 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Error");
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-	app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-
 app.UseStaticFiles();
+
+app.MapControllers();
+
+app.UseHsts();
+app.UseHttpsRedirection();
 
 app.UseRouting();
 

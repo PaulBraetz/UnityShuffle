@@ -15,6 +15,16 @@
 			<ChangePasswordPreset />
 		</WhenNotCollapsed>
 	</CollapseFrame>
+	<AuthorizeView ForRight="@PBCommon.Configuration.Settings.LogReaderRight">
+		<CollapseFrame>
+			<CollapseText>
+				<CollapseChevron/> <Localize Value="Logs"/>
+			</CollapseText>
+			<WhenNotCollapsed>
+				<PBFrontend.UI.Meta.Logging.Logs/>
+			</WhenNotCollapsed>
+		</CollapseFrame>
+	</AuthorizeView>
 	<DeleteUser/>
 	<LogoutPreset />
 </Authorized>

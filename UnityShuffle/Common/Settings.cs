@@ -11,7 +11,7 @@ namespace UnityShuffle.Common
 			//use static readonly fields
 			//Initialize fields using Initializer.Instance fields here
 			Locations = Initializer.Instance.Locations;
-			Branches = Initializer.Instance.Aspects;
+			Branches = Initializer.Instance.Branches;
 			MissionLifespan = Initializer.Instance.MissionLifespan;
 			MissionCreatedHubId = Initializer.Instance.MissionCreatedHubId;
 			MaxMissionNameChars = Initializer.Instance.MaxMissionNameChars;
@@ -39,11 +39,11 @@ namespace UnityShuffle.Common
 		}
 		//Add Settings fields here, make them read/write as necessary
 		public IEnumerable<String> Locations { get; set; } = new[] {"Crusader","Hurston", "ArcCorp", "MicroTech" };
-		public IEnumerable<String> Aspects { get; set; } = new[] { "Forschung", "Raumüberlegenheit", "Marinecorps", "Profit", "Search And Rescue", "Subradar" };
+		public IEnumerable<String> Branches { get; set; } = new[] { "Forschung", "Raumüberlegenheit", "Marinecorps", "Profit", "Search And Rescue", "Subradar" };
 		public TimeSpan MissionLifespan { get; set; } = TimeSpan.FromDays(28);
 		public Guid MissionCreatedHubId { get; set; } = Guid.NewGuid();
 		public Int32 MaxMissionNameChars { get; set; } = 100;
-		public Int32 MinMissionNameChars { get; set; } = 4;
+		public Int32 MinMissionNameChars { get; set; } = 3;
 		public Int32 MaxMissionDescriptionChars { get; set; } = 1000;
 		public Int32 MinMissionDescriptionChars { get; set; } = 10;
 	}

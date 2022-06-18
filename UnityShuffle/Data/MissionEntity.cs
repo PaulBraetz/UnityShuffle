@@ -7,12 +7,12 @@ namespace UnityShuffle.Data
 	public class MissionEntity : ExpiringEntityBase, IHasCreator<UserEntity>
 	{
 		public MissionEntity() { }
-		public MissionEntity(String name, String description, String location, UserEntity creator, TimeSpan lifeSpan, params String[] aspects) : base(lifeSpan, true, false)
+		public MissionEntity(String name, String description, String location, UserEntity creator, TimeSpan lifeSpan, params String[] branches) : base(lifeSpan, true, false)
 		{
 			Name = name;
 			Description = description;
 			Location = location;
-			Branches = aspects;
+			Branches = branches;
 			Ratings = new List<MissionRatingEntity>();
 			Creator = creator;
 		}

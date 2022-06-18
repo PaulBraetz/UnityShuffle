@@ -1,4 +1,5 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿<CascadingValue Value="trackingState">
+	<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
@@ -10,3 +11,16 @@
         </LayoutView>
     </NotFound>
 </Router>
+</CascadingValue>
+
+@code{
+	[Parameter]
+	public Boolean Remember { get; set; }
+
+	private PBShared.Cookies.TrackingConsentState trackingState;
+
+	protected override void OnParametersSet()
+	{
+		trackingState = new PBShared.Cookies.TrackingConsentState(Remember);
+	}
+}

@@ -3,48 +3,89 @@
 <div class="d-flex flex-column">
 	<h5><Localize Value="Create Mission" /></h5>
 	<span class="py-1"></span>
+	<NotAuthorized>
+		<WarningBox>
+			<Header>
+				<Icon T="Icon.Type.exclamation" /> <Localize Value="Attention" />
+			</Header>
+			<ChildContent>
+				<LocalizeFormattable Value="notLoggedInString" />
+			</ChildContent>
+		</WarningBox>
+	</NotAuthorized>
+	<span class="py-1"></span>
 	<TextInput Label="@nameof(request.Name)"
 			   @bind-Value="request.Name"
-			   ValidationField="response.Validation.GetField(nameof(request.Name))" />
+			   ValidationField="response.Validation.GetField(nameof(request.Name))"
+			   Placeholder="" />
 	<Validation ValidationField="response.Validation.GetField(nameof(request.Name))" />
+	<span class="py-1"></span>
+	<SelectInput Label="@nameof(request.Location)"
+				 TOption="String"
+				 Options="Common.HelperEnumerables.LocationOptions"
+				 @bind-Value="request.Location" />
+	<Validation ValidationField="response.Validation.GetField(nameof(request.Location))" />
+	<span class="py-1"></span>
+	<SelectInput Label="@nameof(request.Branches)"
+				 TOption="String"
+				 Options="Common.HelperEnumerables.BranchOptions"
+				 ValueChanged="SelectBranch" />
+	@if (branches.Any())
+	{
+		<ul>
+			@foreach (var branch in branches)
+			{
+				<li @onclick="async e=>branches.Remove(branch)">
+					@branch
+				</li>
+			}
+		</ul>
+	}
+	<Validation ValidationField="response.Validation.GetField(nameof(request.Branches))" />
 	<span class="py-1"></span>
 	<TextInput Label="@nameof(request.Description)"
 			   @bind-Value="@request.Description"
-			   ValidationField="response.Validation.GetField(nameof(request.Description))" />
+			   ValidationField="response.Validation.GetField(nameof(request.Description))"
+			   Placeholder=""
+			   UseTextArea="true" />
 	<Validation ValidationField="response.Validation.GetField(nameof(request.Description))" />
 	<span class="py-1"></span>
-	<TextInput Label="@nameof(request.Location)"
-			   @bind-Value="@request.Location"
-			   ValidationField="response.Validation.GetField(nameof(request.Location))" />
-	<Validation ValidationField="response.Validation.GetField(nameof(request.Location))" />
-	<span class="py-1"></span>
-	<TextInput Label="@nameof(request.Branches)"
-			   @bind-Value="@branches"
-			   ValidationField="response.Validation.GetField(nameof(request.Branches))" />
-	<Validation ValidationField="response.Validation.GetField(nameof(request.Branches))" />
+	<Validation ValidationField="response.Validation.GetField(PBCommon.Validation.ValidationField.REQUEST_NAME)" />
 	<span class="py-1"></span>
 	<button class="btn btn-outline-@ButtonColor" @onclick="Submit">
-		<Localize Value="Submit" />@if(success){<span>&nbsp;<Icon T="Icon.Type.check"/></span>}
+		<Localize Value="Submit" />@if (success)
+		{
+			<span>&nbsp;<Icon T="Icon.Type.check" /></span>
+		}
 	</button>
 </div>
 
 @code {
 	private IMissionService.CreateMissionRequest request = new IMissionService.CreateMissionRequest();
-	private String branches = String.Empty;
+	private HashSet<String> branches = new();
 	private IResponse response = new Response();
 	private Boolean success = false;
-	private String ButtonColor => success?"success":"primary";
+	private String ButtonColor => success ? "success" : "primary";
+	private static LocalizableFormattableString notLoggedInString =
+		new LocalizableFormattableString("You are not logged in, any mission created will therefore expire after {0} days.", true,
+			Common.Settings.MissionLifespan.TotalDays.ToString());
+
+	private void SelectBranch(String branch)
+	{
+		branches.Add(branch);
+		InvokeAsync(StateHasChanged);
+	}
 
 	private async Task Submit()
 	{
 		success = false;
 		await InvokeAsync(StateHasChanged);
-		request.Branches = branches.Split(',', StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
+		request.Branches = branches;
 		response = await SessionParent.ServiceContext.GetService<IMissionService>().CreateMission(request);
 		if (response.Validation.NoneInvalid)
 		{
 			request = new IMissionService.CreateMissionRequest();
-			branches = String.Empty;
+			branches.Clear();
 			response = new Response();
 			success = true;
 		}

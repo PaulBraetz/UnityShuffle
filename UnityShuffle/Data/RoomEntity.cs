@@ -37,12 +37,12 @@ namespace UnityShuffle.Data
 
 		protected virtual Boolean IsAttached { get; set; }
 
-		public void Add(MissionEntity mission)
+		public virtual void Add(MissionEntity mission)
 		{
 			deck.Push(mission);
 		}
 
-		public void Remove(MissionEntity mission)
+		public virtual void Remove(MissionEntity mission)
 		{
 			MissionEntity? top = Top;
 
@@ -65,7 +65,7 @@ namespace UnityShuffle.Data
 			}
 		}
 
-		public void Shuffle()
+		public virtual void Shuffle()
 		{
 			var missions = new List<MissionEntity>();
 
@@ -83,7 +83,7 @@ namespace UnityShuffle.Data
 			}
 		}
 
-		public void Join()
+		public virtual void Join()
 		{
 			while (drawn.TryPop(out MissionEntity? m))
 			{
@@ -91,7 +91,7 @@ namespace UnityShuffle.Data
 			}
 		}
 
-		public void Draw()
+		public virtual void Draw()
 		{
 			if (deck.TryPop(out MissionEntity? c))
 			{
@@ -99,7 +99,7 @@ namespace UnityShuffle.Data
 			}
 		}
 
-		public void Skip()
+		public virtual void Skip()
 		{
 			if (Next != null)
 			{
@@ -122,11 +122,11 @@ namespace UnityShuffle.Data
 			return new RoomEntity(this, circularReferenceHelperDictionary);
 		}
 
-		public void AttachTo(UserSessionEntity session)
+		public virtual void AttachTo(UserSessionEntity session)
 		{
 			IsAttached = true;
 		}
-		public void DetachFrom(UserSessionEntity session)
+		public virtual void DetachFrom(UserSessionEntity session)
 		{
 			IsAttached = false;
 		}

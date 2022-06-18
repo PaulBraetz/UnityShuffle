@@ -2,7 +2,10 @@
 @namespace UnityShuffle.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    Layout = "_Layout";
+	Layout = "_Layout";
 }
 
-<component type="typeof(App)" render-mode="Server" />
+@{
+	var remember = HttpContext.Request.Cookies.ContainsKey(PBShared.Configuration.Settings.AuthCookieName);
+}
+<component param-Remember="remember" type="typeof(App)" render-mode="Server" />
