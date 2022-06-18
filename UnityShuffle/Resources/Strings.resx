@@ -141,6 +141,9 @@
   <data name="Manage Rooms" xml:space="preserve">
     <value>Manage Rooms</value>
   </data>
+  <data name="Select" xml:space="preserve">
+    <value>Select</value>
+  </data>
   <data name="Visit the official git repository :" xml:space="preserve">
     <value>Visit the official git repository :</value>
   </data>

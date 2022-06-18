@@ -23,25 +23,9 @@
 	<SelectInput Label="@nameof(request.Location)"
 				 TOption="String"
 				 Options="Common.HelperEnumerables.LocationOptions"
-				 @bind-Value="request.Location" />
+				 @bind-Value="request.Location"
+				 ValidationField="response.Validation.GetField(nameof(request.Location))" />
 	<Validation ValidationField="response.Validation.GetField(nameof(request.Location))" />
-	<span class="py-1"></span>
-	<SelectInput Label="@nameof(request.Branches)"
-				 TOption="String"
-				 Options="Common.HelperEnumerables.BranchOptions"
-				 ValueChanged="SelectBranch" />
-	@if (branches.Any())
-	{
-		<ul>
-			@foreach (var branch in branches)
-			{
-				<li @onclick="async e=>branches.Remove(branch)">
-					@branch
-				</li>
-			}
-		</ul>
-	}
-	<Validation ValidationField="response.Validation.GetField(nameof(request.Branches))" />
 	<span class="py-1"></span>
 	<TextInput Label="@nameof(request.Description)"
 			   @bind-Value="@request.Description"
@@ -49,6 +33,24 @@
 			   Placeholder=""
 			   UseTextArea="true" />
 	<Validation ValidationField="response.Validation.GetField(nameof(request.Description))" />
+	<span class="py-1"></span>
+	<SelectInput Label="@nameof(request.Branches)"
+				 TOption="String"
+				 Options="Common.HelperEnumerables.BranchOptions"
+				 ValueChanged="SelectBranch"
+				 ValidationField="response.Validation.GetField(nameof(request.Branches))" />
+	@if (branches.Any())
+	{
+		<ul>
+			@foreach (var branch in branches)
+			{
+				<li>
+					@branch <span class="clickable text-danger bg-danger-t50-hover" @onclick="async e=>branches.Remove(branch)"><Icon T="Icon.Type.x" /></span>
+				</li>
+			}
+		</ul>
+	}
+	<Validation ValidationField="response.Validation.GetField(nameof(request.Branches))" />
 	<span class="py-1"></span>
 	<Validation ValidationField="response.Validation.GetField(PBCommon.Validation.ValidationField.REQUEST_NAME)" />
 	<span class="py-1"></span>

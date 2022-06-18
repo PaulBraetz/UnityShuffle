@@ -11,7 +11,7 @@ namespace UnityShuffle.Common
 		}
 		public static Boolean IsValidMissionDescription(this String? strToCheck)
 		{
-			var pattern = $@"^[a-zA-Z0-9][a-zA-Z0-9\s]{{{Settings.MinMissionDescriptionChars - 2},{Settings.MaxMissionDescriptionChars - 2}}}[a-zA-Z0-9]$";
+			var pattern = $@"^[a-zA-Z0-9\.\,\!\?][a-zA-Z0-9\.\,\!\?\s]{{{Settings.MinMissionDescriptionChars - 2},{Settings.MaxMissionDescriptionChars - 2}}}[a-zA-Z0-9\.\,\!\?]$";
 			return strToCheck != null && Regex.IsMatch(strToCheck, pattern);
 		}
 	}

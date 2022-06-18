@@ -141,6 +141,9 @@
   <data name="Manage Rooms" xml:space="preserve">
     <value>Räume Verwalten</value>
   </data>
+  <data name="Select" xml:space="preserve">
+    <value>Auswählen</value>
+  </data>
   <data name="Visit the official git repository :" xml:space="preserve">
     <value>Besuchen Sie das offizielle git repository :</value>
   </data>
