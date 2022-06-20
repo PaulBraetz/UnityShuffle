@@ -1,0 +1,19 @@
+﻿@inherits PBFrontend.UI.Miscellaneous.StateMachine.Children.StateManipulator
+
+<div class="btn-orange @ActiveClass" @onclick="OnClick">
+	<Localize Value="@Title" />
+</div>
+
+@code {
+	[Parameter]
+	public Int32 State { get; set; }
+	[Parameter]
+	public String Title { get; set; } = String.Empty;
+
+	private void OnClick()
+	{
+		SetState(State);
+	}
+
+	public String ActiveClass => StateMachineParent.State == State ? "active" : String.Empty;
+}

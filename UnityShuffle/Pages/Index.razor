@@ -2,40 +2,46 @@
 
 <div class="d-flex flex-column">
 	<div class="d-flex flex-row align-self-center">
-		<div class="d-flex flex-column">
-			<div class="d-flex justify-content-center">
-				<div class="rounded shadow d-flex flex-column m-2 p-2">
-					<User/>
+		<StateMachineFrame>
+			<div class="d-flex flex-column">
+				<div class="d-flex justify-content-center">
+					<div class="rounded m-2 stepbar">
+						<OrangeButton State="0" Title="User"/>
+						<OrangeButton State="1" Title="Create Mission"/>
+						<OrangeButton State="2" Title="Manage Rooms"/>
+						<OrangeButton State="3" Title="Join Rooms"/>
+					</div>
+				</div>
+				<div class="d-flex justify-content-center">
+					<div class="rounded shadow d-flex flex-column m-2 p-2">
+						<Step State="0">
+							<User />
+						</Step>
+						<Step State="1">
+							<CreateMission />
+						</Step>
+						<Step State="2">
+							<ManageRooms />
+						</Step>
+						<Step State="3">
+							<JoinRooms />
+						</Step>
+					</div>
 				</div>
 			</div>
-		</div>
-		<div class="d-flex flex-column">
-			<div class="rounded shadow d-flex flex-column m-2 p-2">
-				<CreateMission />
-			</div>
-		</div>
-		<div class="d-flex flex-column">
-			<div class="rounded shadow d-flex flex-column m-2 p-2">
-				<ManageRooms/>
-			</div>
-		</div>
-		<div class="d-flex flex-column">
-			<div class="rounded shadow d-flex flex-column m-2 p-2">
-				<JoinRooms/>
-			</div>
-		</div>
+		</StateMachineFrame>
 	</div>
 	<div class="d-flex justify-content-center">
-		<Reconnect/>
+		<Reconnect />
 	</div>
 	<div class="d-flex justify-content-center">
-		<DefaultCookieBanner/>
+		<DefaultCookieBanner />
 	</div>
 	<div class="d-flex justify-content-center">
 		<div class="rounded shadow d-flex flex-column m-2 p-2">
 			<span>
-				<Localize Value="Issues?"/><br />
-				<Localize Value="Visit the official git repository :"/> <a href="https://github.com/PaulBraetz/UnityShuffle">GitHub</a>.
+				<Localize Value="Issues?" /><br />
+				<Localize Value="Visit the official git repository :" /> <a href="https://github.com/PaulBraetz/UnityShuffle">GitHub</a>.
 			</span>
 		</div>
 	</div>

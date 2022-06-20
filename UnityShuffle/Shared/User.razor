@@ -1,56 +1,59 @@
 ﻿<Authorized>
-	<CollapseFrame>
-		<CollapseText>
-			<CollapseChevron /><Localize Value="Change Email" />
-		</CollapseText>
-		<WhenNotCollapsed>
-			<ChangeEmailPreset />
-		</WhenNotCollapsed>
-	</CollapseFrame>
-	<CollapseFrame>
-		<CollapseText>
-			<CollapseChevron /><Localize Value="Change Password" />
-		</CollapseText>
-		<WhenNotCollapsed>
-			<ChangePasswordPreset />
-		</WhenNotCollapsed>
-	</CollapseFrame>
-	<AuthorizeView ForRight="@PBCommon.Configuration.Settings.LogReaderRight">
-		<CollapseFrame>
-			<CollapseText>
-				<CollapseChevron/> <Localize Value="Logs"/>
-			</CollapseText>
-			<WhenNotCollapsed>
-				<PBFrontend.UI.Meta.Logging.Logs/>
-			</WhenNotCollapsed>
-		</CollapseFrame>
-	</AuthorizeView>
-	<DeleteUser/>
-	<LogoutPreset />
+	<StateMachineFrame>
+		<div class="d-flex justify-content-center">
+			<PBFrontend.UI.User.SessionUserDetails />
+		</div>
+		<div class="d-flex flex-row">
+			<OrangeButton State="0" Title="Change Password" />
+			<OrangeButton State="1" Title="Change Email" />
+			<AuthorizeView ForRight="@PBCommon.Configuration.Settings.LogReaderRight">
+				<Authorized>
+					<OrangeButton State="2" Title="Logs" />
+				</Authorized>
+			</AuthorizeView>
+			<OrangeButton State="3" Title="Delete User" />
+			<OrangeButton State="4" Title="Logout" />
+		</div>
+		<div class="d-flex justify-content-center">
+			<Step State="0">
+				<ChangePasswordPreset />
+			</Step>
+			<Step State="1">
+				<ChangeEmailPreset />
+			</Step>
+			<AuthorizeView ForRight="@PBCommon.Configuration.Settings.LogReaderRight">
+				<Authorized>
+					<Step State="2">
+						<PBFrontend.UI.Meta.Logging.Logs />
+					</Step>
+				</Authorized>
+			</AuthorizeView>
+			<Step State="3">
+				<DeleteUser />
+			</Step>
+			<Step State="4">
+				<LogoutPreset />
+			</Step>
+		</div>
+	</StateMachineFrame>
 </Authorized>
 <NotAuthorized>
-	<CollapseFrame>
-		<CollapseText>
-			<CollapseChevron /><Localize Value="Register" />
-		</CollapseText>
-		<WhenNotCollapsed>
-			<RegisterPreset />
-		</WhenNotCollapsed>
-	</CollapseFrame>
-	<CollapseFrame>
-		<CollapseText>
-			<CollapseChevron /><Localize Value="Login" />
-		</CollapseText>
-		<WhenNotCollapsed>
-			<LoginPreset />
-		</WhenNotCollapsed>
-	</CollapseFrame>
-	<CollapseFrame>
-		<CollapseText>
-			<CollapseChevron /><Localize Value="Forgot Password" />
-		</CollapseText>
-		<WhenNotCollapsed>
-			<ForgotPasswordPreset />
-		</WhenNotCollapsed>
-	</CollapseFrame>
+	<StateMachineFrame>
+		<div class="d-flex flex-row">
+			<OrangeButton State="0" Title="Login" />
+			<OrangeButton State="1" Title="Register" />
+			<OrangeButton State="2" Title="Forgot Password" />
+		</div>
+		<div class="d-flex justify-content-center">
+			<Step State="0">
+				<LoginPreset />
+			</Step>
+			<Step State="1">
+				<RegisterPreset />
+			</Step>
+			<Step State="2">
+				<ForgotPasswordPreset />
+			</Step>
+		</div>
+	</StateMachineFrame>
 </NotAuthorized>
