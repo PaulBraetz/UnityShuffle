@@ -12,6 +12,8 @@ namespace UnityShuffle.Services.Abstractions
 {
 	public interface IMissionService : IService
 	{
+		Task<IGetPaginatedEncryptableResponse<RoomDto>> GetRooms(IGetPaginatedRequest request);
+
 		sealed class GetMissionRequest
 		{
 			public String Name { get; set; } = String.Empty;
@@ -137,5 +139,11 @@ namespace UnityShuffle.Services.Abstractions
 		Task<IResponse> Skip(String roomName);
 
 		Task<IEncryptableResponse<RoomDto>> GetRoom(String name);
+
+		sealed class SiftMissionsParameter
+		{
+			public String QueryString { get; set; } = String.Empty;
+		}
+		Task<IGetPaginatedEncryptableResponse<MissionEntity>> SiftMissions(IGetPaginatedRequest<SiftMissionsParameter> request);
 	}
 }

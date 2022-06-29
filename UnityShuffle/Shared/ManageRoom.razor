@@ -1,0 +1,57 @@
+﻿@inherits SessionChild
+
+<div class="d-flex flex-column">
+	<div class="mb-2">
+		<span>
+			@Room?.Name
+		</span>
+	</div>
+	<button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#@modalId">
+		<Localize Value="Add Missions To Deck" />
+	</button>
+</div>
+
+<div class="modal fade" id="@modalId" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">
+					<Localize Value="Add Mission To Deck" />
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<SiftMissions @bind-Value="currentAddMission" />
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-danger" data-dismiss="modal">
+					<Localize Value="Cancel" />
+				</button>
+				<button class="btn btn-outline-primary" @onclick="AddMission">
+					<Localize Value="Add Mission" />
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public IMissionService.RoomDto? Room { get; set; }
+
+	private readonly String modalId = $"modal_{Guid.NewGuid()}";
+
+	protected override void OnParametersSetAndSessionInitialized()
+	{
+		Room = GetNotifierDataFor<IMissionService.RoomDto>(Room!);
+		base.OnParametersSetAndSessionInitialized();
+	}
+
+	private MissionEntity? currentAddMission = null;
+	private void AddMission()
+	{
+		currentAddMission = null;
+	}
+}

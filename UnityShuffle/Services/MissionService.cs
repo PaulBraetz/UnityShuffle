@@ -481,7 +481,7 @@ namespace UnityShuffle.Services
 					return GetRoomEntity(roomName);
 				}
 
-				if (roomName == null)
+				if (String.IsNullOrWhiteSpace(roomName))
 				{
 					var bytes = new Byte[8];
 					String getName()
@@ -503,6 +503,7 @@ namespace UnityShuffle.Services
 					await FirstNullCheck(duplicate,
 							response.EnsureField(nameof(request.RoomName)),
 							ValidationCode.Duplicate)
+						.InvertCriterion()
 						.SetOnCriterionMet(create)
 						.Evaluate(response);
 				}
@@ -511,6 +512,76 @@ namespace UnityShuffle.Services
 			await FirstRequestNullCheck(request, response)
 				.SetOnCriterionMet(notNullRequest)
 				.CatchAll(response.EnsureField(nameof(request)))
+				.Evaluate(response);
+
+			return response;
+		}
+
+		public async Task<IGetPaginatedEncryptableResponse<MissionEntity>> SiftMissions(IGetPaginatedRequest<IMissionService.SiftMissionsParameter> request)
+		{
+			var response = new GetPaginatedEncryptableResponse<MissionEntity>();
+
+			async Task notNullRequest()
+			{
+				var queryStrings = request.Parameter.QueryString?
+					.Split(' ', StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries)
+					.Select(s=>s.ToLowerInvariant()) ?? Array.Empty<String>();
+				var query = Connection.Query<MissionEntity>();
+				foreach(var queryString in queryStrings)
+				{
+					query = query.Where(m => m.Name.ToLowerInvariant().Contains(queryString) ||
+										   m.Description.ToLowerInvariant().Contains(queryString) ||
+										   m.Location.ToLowerInvariant().Contains(queryString) ||
+										   m.Branches.Any(b => b.ToLowerInvariant().Contains(queryString)));
+				}
+
+				void setData()
+				{
+					response.LastPage = query.GetPageCount(request.PerPage);
+					response.Data = query.Paginate(request.PerPage, request.Page)
+						.CloneAsT()
+						.ToArray();
+				}
+
+				await CachedCriterionChain.Cache.Get()
+					.ThisValidatePagination(request, query)
+					.SetOnCriterionMet(setData)
+					.Evaluate(response);
+			}
+			await FirstParameterizedRequestNullCheck(request, response)
+				.SetOnCriterionMet(notNullRequest)
+				.CatchAll(ValidationField.Request)
+				.Evaluate(response);
+
+			return response;
+		}
+
+		public async Task<IGetPaginatedEncryptableResponse<IMissionService.RoomDto>> GetRooms(IGetPaginatedRequest request)
+		{
+			var response = new GetPaginatedEncryptableResponse<IMissionService.RoomDto>();
+
+			async Task notNullRequest()
+			{
+				var data = Session.GetAttached<RoomEntity>(Connection);
+
+				void setData()
+				{
+					response.LastPage = data.GetPageCount(request.PerPage);
+					response.Data = data.Paginate(request.PerPage, request.Page)
+						.CloneAsT()
+						.Select(r => new IMissionService.RoomDto(r))
+						.ToArray();
+				}
+
+				await CachedCriterionChain.Cache.Get()
+					.ThisValidatePagination(request, data)
+					.SetOnCriterionMet(setData)
+					.Evaluate(response);
+			}
+
+			await FirstRequestNullCheck(request, response)
+				.SetOnCriterionMet(notNullRequest)
+				.CatchAll(ValidationField.Request)
 				.Evaluate(response);
 
 			return response;

@@ -1,3 +1,6 @@
+body {
+	font-family: LatoWebLight;
+}
 
 #blazor-error-ui {
 	background: lightyellow;
@@ -18,10 +21,14 @@
 		top: 0.5rem;
 	}
 
+.bg-default {
+	background-color: white;
+}
+
 /*Required custom*/
 
 .bg-custom-transparent {
-	background-color: rgba(255,255,255,0.01);
+	background-color: white;
 }
 
 /*Themes*/
@@ -31,15 +38,15 @@
 }
 
 .text-theme-light {
-	color: black
+	color: black;
 }
 /*Dark*/
 .bg-theme-dark {
-	background-color: white
+	background-color: white;
 }
 
 .text-theme-dark {
-	color: black
+	color: black;
 }
 
 /*Clickables*/

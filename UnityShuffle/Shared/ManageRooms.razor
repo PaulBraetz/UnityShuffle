@@ -1,12 +1,85 @@
-﻿@inherits SessionChild
+﻿@using PBData.Extensions
+@inherits SessionChild
 
 <div class="d-flex flex-column">
-	<Localize Value="Manage Rooms"/>
-	<p>
-		Coming Soon!
-	</p>
+	<div class="d-flex justify-content-center">
+		<Localize Value="Manage Rooms" />
+	</div>
+	<div class="d-flex flex-column">
+		<div class="d-flex flex-column">
+			<button class="btn btn-outline-primary" data-toggle="modal" data-target="#@modalId">
+				<Localize Value="Create Room" />
+			</button>
+		</div>
+		@if (rooms?.Data?.Any() ?? false)
+		{
+			@foreach (var room in rooms.Data)
+			{
+				<div class="mt-2">
+					<ManageRoom Room="room" />
+				</div>
+			}
+		}
+	</div>
+</div>
+
+<div class="modal fade" id="@modalId" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">
+					<Localize Value="Create Room" />
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="ResetCreateRoom">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<TextInput Label="@nameof(createRoomRequest.RoomName)"
+						   @bind-Value="createRoomRequest.RoomName"
+						   ValidationField="createRoomResponse.Validation.GetField(nameof(createRoomRequest.RoomName))"
+						   OnEnterPressed="CreateRoom" />
+						   <Validation ValidationField="createRoomResponse.Validation.GetField(nameof(createRoomRequest.RoomName))"/>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-danger" data-dismiss="modal" @onclick="ResetCreateRoom">
+					<Localize Value="Cancel" />
+				</button>
+				<button class="btn btn-outline-primary" @onclick="CreateRoom">
+					<Localize Value="Create Room" />
+				</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 @code {
+	private readonly String modalId = $"modal_{Guid.NewGuid()}";
 
+	private IGetPaginatedResponse<IMissionService.RoomDto> rooms = new GetPaginatedResponse<IMissionService.RoomDto>();
+
+	protected override async Task OnParametersSetAndSessionInitializedAsync()
+	{
+		var request = new GetPaginatedRequest()
+			{
+				PerPage = PBCommon.Configuration.Settings.MaxPaginatedPerPage,
+				Page = 0
+			};
+		rooms = await SessionParent.ServiceContext.GetService<IMissionService>().GetRooms(request);
+		await base.OnParametersSetAndSessionInitializedAsync();
+	}
+
+	private IMissionService.CreateRoomRequest createRoomRequest = new IMissionService.CreateRoomRequest();
+	private IResponse createRoomResponse = new Response();
+
+	private async Task CreateRoom()
+	{
+		createRoomResponse = await SessionParent.ServiceContext.GetService<IMissionService>().CreateRoom(createRoomRequest);
+		await InvokeAsync(StateHasChanged);
+	}
+	private void ResetCreateRoom()
+	{
+		createRoomRequest.RoomName = String.Empty;
+		createRoomResponse = new Response();
+	}
 }

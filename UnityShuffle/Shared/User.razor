@@ -3,16 +3,18 @@
 		<div class="d-flex justify-content-center">
 			<PBFrontend.UI.User.SessionUserDetails />
 		</div>
-		<div class="d-flex flex-row">
-			<OrangeButton State="0" Title="Change Password" />
-			<OrangeButton State="1" Title="Change Email" />
-			<AuthorizeView ForRight="@PBCommon.Configuration.Settings.LogReaderRight">
-				<Authorized>
-					<OrangeButton State="2" Title="Logs" />
-				</Authorized>
-			</AuthorizeView>
-			<OrangeButton State="3" Title="Delete User" />
-			<OrangeButton State="4" Title="Logout" />
+		<div class="d-flex justify-content-center">
+			<div class="d-flex flex-row">
+				<OrangeButton State="0" Title="Change Password" />
+				<OrangeButton State="1" Title="Change Email" />
+				<AuthorizeView ForRight="@PBCommon.Configuration.Settings.LogReaderRight">
+					<Authorized>
+						<OrangeButton State="2" Title="Logs" />
+					</Authorized>
+				</AuthorizeView>
+				<OrangeButton State="3" Title="Delete User" />
+				<OrangeButton State="4" Title="Logout" />
+			</div>
 		</div>
 		<div class="d-flex justify-content-center">
 			<Step State="0">
@@ -39,10 +41,12 @@
 </Authorized>
 <NotAuthorized>
 	<StateMachineFrame>
-		<div class="d-flex flex-row">
+		<div class="d-flex justify-content-center">
+			<div class="d-flex flex-row">
 			<OrangeButton State="0" Title="Login" />
 			<OrangeButton State="1" Title="Register" />
 			<OrangeButton State="2" Title="Forgot Password" />
+		</div>
 		</div>
 		<div class="d-flex justify-content-center">
 			<Step State="0">

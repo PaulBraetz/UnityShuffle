@@ -1,6 +1,6 @@
 ﻿@inherits SessionChild
 
-@if (notfier?.Data != null)
+@if (notifier?.Data != null)
 {
 	<div class="rounded bg-info-t10">
 		<dl>
@@ -8,31 +8,36 @@
 				<Localize Value="@nameof(MissionEntity.Name)" />
 			</dt>
 			<dd>
-				@notfier.Data.Name
+				@notifier.Data.Name
 			</dd>
 			<dt>
 				<Localize Value="@nameof(MissionEntity.Description)" />
 			</dt>
 			<dd>
-				@notfier.Data.Description
+				@notifier.Data.Description
 			</dd>
 			<dt>
 				<Localize Value="@nameof(MissionEntity.Location)" />
 			</dt>
 			<dd>
-				@notfier.Data.Location
+				@notifier.Data.Location
 			</dd>
 			<dt>
 				<Localize Value="@nameof(MissionEntity.Branches)" />
 			</dt>
 			<dd>
-				@String.Join(", ", notfier.Data.Branches)
+				@String.Join(", ", notifier.Data.Branches)
 			</dd>
 			<dt>
 				<Localize Value="Average Completion Time" />
 			</dt>
 			<dd>
-				@SessionParent.Localize(TimeSpan.FromTicks((long)notfier.Data.Ratings.Select(r=>r.TimeTaken.Ticks).Average()), "hh:mm")
+				@if (notifier.Data.Ratings.Any())
+				{
+					@SessionParent.Localize(TimeSpan.FromTicks((long)notifier.Data.Ratings.Select(r=>r.TimeTaken.Ticks).Average()), "hh:mm")
+				}else{
+					<Localize Value="No Ratings Yet"/>
+				}
 			</dd>
 		</dl>
 	</div>
@@ -42,10 +47,10 @@
 	[Parameter]
 	public MissionEntity? Mission { get; set; }
 
-	private INotifyStateChange<MissionEntity?>? notfier;
+	private INotifyStateChange<MissionEntity?>? notifier;
 
 	protected override void OnParametersSetAndSessionInitialized()
 	{
-		notfier = GetNotifierFor(Mission);
+		notifier = GetNotifierFor(Mission);
 	}
 }

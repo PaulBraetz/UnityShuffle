@@ -1,0 +1,44 @@
+﻿@inherits SessionChild
+<div class="d-flex flex-row">
+	<div class="d-flex flex-column">
+		<TextInput @bind-Value="parameter.QueryString"
+				   Label="Search Missions" 
+				   OnEnterPressed="Submit"/>
+		<div class="dropdown">
+			<ResponseDropdown TValue="MissionEntity"
+							Response="response"
+							NameMapper="(m)=>m.Name"
+							LocalizeName="false"
+							@bind-Value="Value"/>
+		</div>
+	</div>
+	@if (Value != null)
+	{
+		<div class="d-flex flex-column justify-content-center ml-2">
+			<MissionEntityDisplay Mission="Value" />
+		</div>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public MissionEntity? Value { get; set; }
+	[Parameter]
+	public EventCallback<MissionEntity?> ValueChanged { get; set; }
+
+	private IMissionService.SiftMissionsParameter parameter = new IMissionService.SiftMissionsParameter();
+
+	private IGetPaginatedResponse<MissionEntity> response = new GetPaginatedResponse<MissionEntity>();
+
+	private async Task Submit()
+	{
+		response = await SessionParent.ServiceContext.GetService<IMissionService>()
+			.SiftMissions(new GetPaginatedRequest<IMissionService.SiftMissionsParameter>()
+				{
+					PerPage = 10,
+					Page = 0,
+					Parameter = parameter
+				});
+		await InvokeAsync(StateHasChanged);
+	}
+}
